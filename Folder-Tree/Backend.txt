@@ -1,0 +1,126 @@
+browser/
+├── backend/
+│   ├── src/
+│   │   ├── index.js             # Node.jsエントリーポイント
+│   │   ├── websocket.js         # WebSocketサーバー
+│   │   ├── api/                 # APIエンドポイント
+│   │   │   ├── bookmarks.js
+│   │   │   ├── history.js
+│   │   │   ├── settings.js
+│   │   │   ├── tabs.js
+│   │   │   ├── downloads.js
+│   │   │   ├── pdf.js
+│   │   │   ├── translate.js
+│   │   │   ├── screenshot.js
+│   │   │   ├── pip.js
+│   │   │   ├── reader.js
+│   │   │   ├── devtools.js
+│   │   │   ├── cookies.js
+│   │   │   ├── javascript.js
+│   │   │   ├── cache.js
+│   │   │   ├── prerender.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── logs.js
+│   │   │   ├── health.js
+│   │   │   └── backup.js
+│   │   ├── db/                  # データベース関連
+│   │   │   ├── index.js         # データベース接続
+│   │   │   └── migrations/      # マイグレーションスクリプト
+│   │   │       ├── 001-create-bookmarks-table.js
+│   │   │       ├── 002-create-history-table.js
+│   │   │       ├── 003-create-settings-table.js
+│   │   │       ├── 004-create-tabs-table.js
+│   │   │       ├── 005-create-downloads-table.js
+│   │   │       ├── 006-create-cache-table.js
+│   │   │       └── 007-add-jsonb-columns.js
+│   │   ├── services/           # ビジネスロジック
+│   │   │   ├── bookmarks.js
+│   │   │   ├── history.js
+│   │   │   ├── settings.js
+│   │   │   ├── tabs.js
+│   │   │   ├── downloads.js
+│   │   │   ├── pdf.js
+│   │   │   ├── translate.js
+│   │   │   ├── screenshot.js
+│   │   │   ├── pip.js
+│   │   │   ├── reader.js
+│   │   │   ├── devtools.js
+│   │   │   ├── cookies.js
+│   │   │   ├── javascript.js
+│   │   │   ├── cache.js
+│   │   │   ├── prerender.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── logs.js
+│   │   │   ├── health.js
+│   │   │   └── backup.js
+│   │   ├── utils/              # ユーティリティ関数
+│   │   │   ├── logger.js
+│   │   │   ├── validator.js
+│   │   │   ├── error-handler.js
+│   │   │   ├── auth.js
+│   │   │   ├── database.js
+│   │   │   ├── cache.js
+│   │   │   ├── websocket.js
+│   │   │   ├── api.js
+│   │   │   ├── cef.js
+│   │   │   ├── pdf.js
+│   │   │   ├── translate.js
+│   │   │   ├── screenshot.js
+│   │   │   ├── pip.js
+│   │   │   ├── reader.js
+│   │   │   ├── devtools.js
+│   │   │   ├── cookies.js
+│   │   │   ├── javascript.js
+│   │   │   ├── prerender.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── logs.js
+│   │   │   ├── health.js
+│   │   │   └── backup.js
+│   │   ├── config/             # 設定ファイル
+│   │   │   ├── default.js
+│   │   │   ├── production.js
+│   │   │   └── development.js
+│   │   ├── middleware/         # ミドルウェア
+│   │   │   ├── auth.js
+│   │   │   ├── error-handler.js
+│   │   │   ├── logging.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── cache.js
+│   │   │   └── rate-limit.js
+│   │   ├── tests/              # テスト
+│   │   │   ├── api.test.js
+│   │   │   ├── db.test.js
+│   │   │   ├── services.test.js
+│   │   │   ├── utils.test.js
+│   │   │   ├── middleware.test.js
+│   │   │   ├── websocket.test.js
+│   │   │   ├── cef.test.js
+│   │   │   ├── pdf.test.js
+│   │   │   ├── translate.test.js
+│   │   │   ├── screenshot.test.js
+│   │   │   ├── pip.test.js
+│   │   │   ├── reader.test.js
+│   │   │   ├── devtools.test.js
+│   │   │   ├── cookies.test.js
+│   │   │   ├── javascript.test.js
+│   │   │   ├── prerender.test.js
+│   │   │   ├── security.test.js
+│   │   │   ├── performance.test.js
+│   │   │   ├── monitoring.test.js
+│   │   │   ├── logs.test.js
+│   │   │   ├── health.test.js
+│   │   │   └── backup.test.js
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   ├── .env
+│   │   ├── .eslintrc.js
+│   │   └── .prettierrc.js
+│   ├── Dockerfile
+│   └── docker-compose.yml

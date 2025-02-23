@@ -1,0 +1,432 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  roleId        String?
+  role          Role?     @relation(fields: [roleId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+
+  // サーバー関連
+  ownedServers Server[]       @relation("ServerOwner")
+  servers      ServerMember[]
+  messages     Message[]
+
+  // お知らせ関連
+  announcementReads AnnouncementRead[] @relation("AnnouncementReader")
+
+  // ブラウザ関連
+  browserHistory         BrowserHistory[]        @relation("BrowserHistoryUser")
+  browserSettings        BrowserSettings?        @relation("BrowserSettingsUser")
+  browserBookmarks       BrowserBookmark[]       @relation("BookmarkUser")
+  browserBookmarkFolders BrowserBookmarkFolder[] @relation("BookmarkFolderUser")
+  browserDownloads       BrowserDownload[]       @relation("DownloadUser")
+  adBlockSettings        AdBlockSettings?        @relation("AdBlockUser")
+
+  // ユーザー設定
+  settings UserSettings? @relation("UserSettings")
+
+  // フレンド関連
+  sentFriendRequests     Friend[] @relation("SentFriendRequests")
+  receivedFriendRequests Friend[] @relation("ReceivedFriendRequests")
+
+  // 招待関連
+  invites ServerInvite[] @relation("inviter")
+
+  // セッション関連
+  userSessions UserSession[]
+
+  browserSessions BrowserSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Server {
+  id                          String   @id @default(cuid())
+  name                        String
+  description                 String?
+  imageUrl                    String?
+  ownerId                     String
+  defaultRoleId               String
+  systemChannelId             String?
+  rulesChannelId              String?
+  features                    String[]
+  memberCount                 Int      @default(0)
+  maxMembers                  Int      @default(100)
+  explicitContentFilter       String   @default("DISABLED")
+  defaultMessageNotifications String   @default("ALL_MESSAGES")
+  region                      String   @default("japan")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  owner     User            @relation("ServerOwner", fields: [ownerId], references: [id])
+  roles     ServerRole[]
+  channels  ServerChannel[]
+  members   ServerMember[]
+  invites   ServerInvite[]
+  auditLogs AuditLogEntry[]
+}
+
+model ServerRole {
+  id          String   @id @default(cuid())
+  serverId    String
+  name        String
+  color       String
+  position    Int
+  permissions String[]
+  mentionable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
+
+model ServerChannel {
+  id                   String   @id @default(cuid())
+  serverId             String
+  name                 String
+  type                 String
+  position             Int
+  topic                String?
+  nsfw                 Boolean  @default(false)
+  rateLimitPerUser     Int      @default(0)
+  parentId             String?
+  lastMessageId        String?
+  permissionOverwrites Json[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  server   Server          @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  parent   ServerChannel?  @relation("ChannelHierarchy", fields: [parentId], references: [id])
+  children ServerChannel[] @relation("ChannelHierarchy")
+  messages Message[]
+  invites  ServerInvite[]
+}
+
+model ServerMember {
+  id                         String    @id @default(cuid())
+  serverId                   String
+  userId                     String
+  nickname                   String?
+  roles                      String[]
+  joinedAt                   DateTime  @default(now())
+  communicationDisabledUntil DateTime?
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([serverId, userId])
+}
+
+model ServerInvite {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  serverId  String
+  channelId String
+  inviterId String
+  maxUses   Int?
+  maxAge    Int?
+  temporary Boolean   @default(false)
+  uses      Int       @default(0)
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  server  Server        @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  channel ServerChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  inviter User          @relation("inviter", fields: [inviterId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id              String    @id @default(cuid())
+  channelId       String
+  authorId        String
+  content         String    @db.Text
+  type            String    @default("DEFAULT")
+  attachments     Json[]
+  embeds          Json[]
+  reactions       Json[]
+  mentionEveryone Boolean   @default(false)
+  mentionRoles    String[]
+  mentionUsers    String[]
+  replyToId       String?
+  threadId        String?
+  pinned          Boolean   @default(false)
+  tts             Boolean   @default(false)
+  nonce           String?
+  editedTimestamp DateTime?
+  deleted         Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  channel ServerChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replyTo Message?      @relation("MessageReply", fields: [replyToId], references: [id])
+  replies Message[]     @relation("MessageReply")
+}
+
+model AuditLogEntry {
+  id         String   @id @default(cuid())
+  serverId   String
+  actionType String
+  executorId String
+  targetId   String?
+  changes    Json[]
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  content     String    @db.Text
+  type        String    @default("INFO") // INFO, WARNING, ERROR
+  priority    Int       @default(0)
+  published   Boolean   @default(false)
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  targetUsers String[] // 特定のユーザーグループ向けのお知らせ
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // リレーション
+  reads AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String   @id @default(cuid())
+  userId         String
+  announcementId String
+  readAt         DateTime @default(now())
+
+  // リレーション
+  user         User         @relation("AnnouncementReader", fields: [userId], references: [id], onDelete: Cascade)
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, announcementId])
+  @@index([userId])
+  @@index([announcementId])
+}
+
+model BrowserHistory {
+  id        String   @id @default(cuid())
+  url       String
+  title     String?
+  visitedAt DateTime @default(now())
+  userId    String
+  blocked   Boolean  @default(false)
+  user      User     @relation("BrowserHistoryUser", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([url])
+  @@index([visitedAt])
+}
+
+model BrowserSettings {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  theme        String   @default("light")
+  searchEngine String   @default("google")
+  startPage    String   @default("school-hub://start")
+  lastUpdated  DateTime @updatedAt
+  user         User     @relation("BrowserSettingsUser", fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model BrowserBookmark {
+  id        String                 @id @default(cuid())
+  userId    String
+  title     String
+  url       String
+  icon      String?
+  folderId  String?
+  folder    BrowserBookmarkFolder? @relation(fields: [folderId], references: [id])
+  user      User                   @relation("BookmarkUser", fields: [userId], references: [id])
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+}
+
+model BrowserBookmarkFolder {
+  id        String                  @id @default(cuid())
+  userId    String
+  name      String
+  parentId  String?
+  parent    BrowserBookmarkFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children  BrowserBookmarkFolder[] @relation("FolderHierarchy")
+  bookmarks BrowserBookmark[]
+  user      User                    @relation("BookmarkFolderUser", fields: [userId], references: [id])
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  @@index([userId])
+  @@index([parentId])
+}
+
+model BrowserDownload {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  filename  String
+  status    String
+  progress  Int      @default(0)
+  size      Int?
+  mimeType  String?
+  user      User     @relation("DownloadUser", fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model AdBlockSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  enabled         Boolean  @default(true)
+  customRules     String[]
+  customSelectors String[]
+  user            User     @relation("AdBlockUser", fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model UserSettings {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  theme         String   @default("system")
+  notifications Json
+  privacy       Json
+  language      String   @default("ja")
+  timezone      String   @default("Asia/Tokyo")
+  user          User     @relation("UserSettings", fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Friend {
+  id         String   @id @default(cuid())
+  status     String   @default("PENDING")
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sender   User @relation("SentFriendRequests", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
+}
+
+model UserSession {
+  id        String    @id @default(cuid())
+  userId    String
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([startTime])
+}
+
+// ブラウザセッション
+model BrowserSession {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime    DateTime     @default(now())
+  lastActivity DateTime     @updatedAt
+  userAgent    String
+  tabs         BrowserTab[]
+
+  @@index([userId])
+  @@index([lastActivity])
+}
+
+// ブラウザタブ
+model BrowserTab {
+  id        String         @id @default(cuid())
+  sessionId String
+  session   BrowserSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  url       String
+  title     String
+  favicon   String?
+  closed    Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([sessionId])
+  @@index([closed])
+}
+
+// セキュリティアラート
+model BrowserSecurityAlert {
+  id        String   @id @default(cuid())
+  severity  String // 'warning' | 'error'
+  message   String
+  details   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// パフォーマンスメトリクス
+model BrowserPerformanceMetric {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  metrics   Json
+  type      String // 'memory' | 'cpu' | 'network'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  permissions Json
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

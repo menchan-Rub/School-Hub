@@ -1,0 +1,102 @@
+groups:
+  - name: browser_alerts
+    rules:
+      # メモリ使用量のアラート
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="school-hub-browser"} > 1.5e9  # 1.5GB
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "メモリ使用量が高くなっています"
+          description: "インスタンス {{ $labels.instance }} のメモリ使用量が1.5GBを超えています"
+
+      # CPU使用率のアラート
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="school-hub-browser"}[1m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU使用率が高くなっています"
+          description: "インスタンス {{ $labels.instance }} のCPU使用率が80%を超えています"
+
+      # セキュリティアラートの急増
+      - alert: SecurityAlertSpike
+        expr: rate(browser_security_alerts_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "セキュリティアラートが急増しています"
+          description: "5分間で10件以上のセキュリティアラートが発生しています"
+
+      # アクティブユーザー数の急減
+      - alert: ActiveUsersDropped
+        expr: browser_active_users < 10 and hour() > 9 and hour() < 18
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "アクティブユーザー数が急減しています"
+          description: "営業時間内にアクティブユーザー数が10人を下回っています"
+
+      # データベース接続エラー
+      - alert: DatabaseConnectionErrors
+        expr: rate(browser_database_connection_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "データベース接続エラーが発生しています"
+          description: "データベースへの接続エラーが検出されました"
+
+      # WebSocket接続エラー
+      - alert: WebSocketConnectionErrors
+        expr: rate(browser_websocket_connection_errors_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "WebSocket接続エラーが発生しています"
+          description: "WebSocket接続エラーが多発しています"
+
+      # ディスク使用量
+      - alert: HighDiskUsage
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ディスク空き容量が少なくなっています"
+          description: "ディスクの空き容量が10%を下回っています"
+
+      # Postgresのコネクション数
+      - alert: HighPostgresConnections
+        expr: pg_stat_activity_count > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Postgresのコネクション数が多くなっています"
+          description: "データベースのアクティブコネクション数が100を超えています"
+
+      # レスポンスタイム
+      - alert: HighResponseTime
+        expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "レスポンスタイムが遅くなっています"
+          description: "平均レスポンスタイムが1秒を超えています"
+
+      # エラーレート
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "エラーレートが高くなっています"
+          description: "HTTP 5xxエラーの割合が5%を超えています" 

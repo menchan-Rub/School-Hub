@@ -1,0 +1,26 @@
+version https://git-lfs.github.com/spec/v1
+oid sha256:a7ed1fd29bcbc8f51bbcde9b88242204e65094512dbfa75b82b9e082a9f7b935
+size 808
+node_modules
+Browser/cef/build/CMakeFiles/3.22.1/CMakeDetermineCompilerABI_C.bin
+Browser/cef/build/CMakeFiles/3.22.1/CMakeDetermineCompilerABI_CXX.bin
+Browser/cef/build/libEGL.so
+Browser/cef/build/libGLESv2.so
+Browser/cef/build/libcef.so
+Browser/cef/build/v8_context_snapshot.bin
+Browser/cef/third_party/cef/Debug/libEGL.so
+Browser/cef/third_party/cef/Debug/libGLESv2.so
+Browser/cef/third_party/cef/Debug/libcef.so
+Browser/cef/third_party/cef/Debug/libvk_swiftshader.so
+Browser/cef/third_party/cef/Debug/v8_context_snapshot.bin
+Browser/cef/third_party/cef/Release/libEGL.so
+Browser/cef/third_party/cef/Release/libGLESv2.so
+Browser/cef/third_party/cef/Release/libcef.so
+Browser/cef/third_party/cef/Release/libvk_swiftshader.so
+Browser/cef/third_party/cef/Release/v8_context_snapshot.bin
+Browser/cef/third_party/cef/build/CMakeFiles/3.22.1/CMakeDetermineCompilerABI_C.bin
+Browser/cef/third_party/cef/build/CMakeFiles/3.22.1/CMakeDetermineCompilerABI_CXX.bin
+Browser/cef/third_party/cef/cef_binary_133.4.2+g0852ba6+chromium-133.0.6943.127_linux64.tar.bz2
+.next
+Browser/cef/third_party/cef/Release/libcef.so
+Browser/cef/third_party/cef/Release/libcef.so

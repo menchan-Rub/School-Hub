@@ -1,0 +1,172 @@
+.chrome-tabs {
+  box-sizing: border-box;
+  position: relative;
+  font-family: system-ui;
+  font-size: 12px;
+  height: 40px;
+  padding: 8px 3px 4px 3px;
+  background: var(--browser-toolbar-bg);
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+}
+
+.chrome-tabs * {
+  box-sizing: inherit;
+  font: inherit;
+}
+
+.chrome-tabs .chrome-tabs-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chrome-tab {
+  position: absolute;
+  left: 0;
+  height: 32px;
+  width: 240px;
+  border: 0;
+  margin: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--browser-tab-bg);
+  transition: background-color 0.2s ease;
+}
+
+.chrome-tab[active] {
+  background: var(--browser-tab-active-bg);
+}
+
+.chrome-tab,
+.chrome-tab * {
+  user-select: none;
+  cursor: default;
+}
+
+.chrome-tab .chrome-tab-dividers {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: var(--tab-content-margin);
+  right: var(--tab-content-margin);
+  background: var(--browser-tab-bg);
+  border-radius: 8px;
+}
+
+.chrome-tab[active] .chrome-tab-dividers {
+  background: var(--browser-tab-active-bg);
+}
+
+.chrome-tab .chrome-tab-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  transition: background-color 0.2s ease;
+}
+
+.chrome-tab .chrome-tab-background > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chrome-tab .chrome-tab-content {
+  position: absolute;
+  display: flex;
+  top: 0;
+  bottom: 0;
+  left: var(--tab-content-margin);
+  right: var(--tab-content-margin);
+  padding: 9px 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow: hidden;
+  pointer-events: all;
+  align-items: center;
+}
+
+.chrome-tab .chrome-tab-favicon {
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+}
+
+.chrome-tab .chrome-tab-favicon img {
+  width: 16px;
+  height: 16px;
+}
+
+.chrome-tab .chrome-tab-title {
+  flex: 1;
+  color: var(--browser-tab-text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.chrome-tab .chrome-tab-close {
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin-left: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.chrome-tab .chrome-tab-close svg {
+  width: 12px;
+  height: 12px;
+  fill: var(--browser-tab-text);
+  transition: fill 0.2s ease;
+}
+
+.chrome-tab.chrome-tab-was-just-added {
+  top: 10px;
+  animation: chrome-tab-was-just-added 120ms forwards ease-in-out;
+}
+
+.chrome-tab .chrome-tab-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.chrome-tab .chrome-tab-close:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.chrome-tab.chrome-tab-is-dragging {
+  z-index: 3;
+  transition: none;
+}
+
+.chrome-tab.chrome-tab-is-dragging * {
+  transition: none;
+}
+
+@keyframes chrome-tab-was-just-added {
+  to {
+    top: 0;
+  }
+}
+
+.chrome-tabs.chrome-tabs-is-sorting .chrome-tab:not(.chrome-tab-is-dragging),
+.chrome-tabs:not(.chrome-tabs-is-sorting) .chrome-tab.chrome-tab-was-just-dragged {
+  transition: transform 120ms ease-in-out;
+}
+
+.chrome-tabs .chrome-tabs-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  left: 0;
+  width: 100%;
+  background: var(--browser-toolbar-bg);
+  z-index: 10;
+}

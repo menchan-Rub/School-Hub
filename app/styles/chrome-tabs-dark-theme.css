@@ -1,0 +1,40 @@
+.chrome-tabs.dark-theme {
+  background: #202124;
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-dividers {
+  background: #4a4d51;
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-background {
+  background: #292b2e;
+  box-shadow: 0 0 0.5px rgba(255, 255, 255, .2), 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.chrome-tabs.dark-theme .chrome-tab[active] .chrome-tab-background {
+  background: #323639;
+}
+
+.chrome-tabs.dark-theme .chrome-tab:not([active]) .chrome-tab-background {
+  background: #202124;
+}
+
+.chrome-tabs.dark-theme .chrome-tab:not([active]):hover .chrome-tab-background {
+  background: #292b2e;
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-title {
+  color: #e8eaed;
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-close {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .65)' stroke-width='1.5' d='M0 0L8 8M8 0L0 8'></path></svg>");
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-close:hover {
+  background-color: rgba(255, 255, 255, .1);
+}
+
+.chrome-tabs.dark-theme .chrome-tab .chrome-tab-close:active {
+  background-color: rgba(255, 255, 255, .2);
+} 

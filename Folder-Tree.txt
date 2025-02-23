@@ -1,0 +1,730 @@
+browser/
+├── backend/
+│   ├── src/
+│   │   ├── index.js✅
+│   │   ├── websocket.js✅
+│   │   ├── api/✅
+│   │   │   ├── bookmarks.js
+│   │   │   ├── history.js
+│   │   │   ├── settings.js
+│   │   │   ├── tabs.js
+│   │   │   ├── downloads.js
+│   │   │   ├── pdf.js
+│   │   │   ├── translate.js
+│   │   │   ├── screenshot.js
+│   │   │   ├── pip.js
+│   │   │   ├── reader.js
+│   │   │   ├── devtools.js
+│   │   │   ├── cookies.js
+│   │   │   ├── javascript.js
+│   │   │   ├── cache.js
+│   │   │   ├── prerender.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── logs.js
+│   │   │   ├── health.js
+│   │   │   └── backup.js
+│   │   ├── db/✅
+│   │   │   ├── index.js
+│   │   ├── utils/
+│   │   │   ├── api.js
+│   │   │   ├── auth.js
+│   │   │   ├── backup.js
+│   │   │   ├── cache.js
+│   │   │   ├── cef.js
+│   │   │   ├── cookies.js
+│   │   │   ├── database.js
+│   │   │   ├── devtools.js
+│   │   │   ├── error-handler.js
+│   │   │   ├── health.js
+│   │   │   ├── javascript.js
+│   │   │   ├── logger.js
+│   │   │   ├── logs.js
+│   │   │   ├── monitoring.js
+│   │   │   ├── pdf.js
+│   │   │   ├── performance.js
+│   │   │   ├── pip.js
+│   │   │   ├── prerender.js
+│   │   │   ├── reader.js
+│   │   │   ├── screenshot.js
+│   │   │   ├── security.js
+│   │   │   ├── translate.js
+│   │   │   ├── validator.js
+│   │   │   └── websocket.js
+│   │   ├── config/✅
+│   │   │   ├── default.js
+│   │   │   ├── production.js
+│   │   │   └── development.js
+│   │   ├── middleware/ ✅
+│   │   │   ├── auth.js
+│   │   │   ├── error-handler.js
+│   │   │   ├── logging.js
+│   │   │   ├── security.js
+│   │   │   ├── performance.js
+│   │   │   ├── cache.js
+│   │   │   └── rate-limit.js
+│   │   ├── tests/
+│   │   │   ├── api.test.js
+│   │   │   ├── backup.test.js
+│   │   │   ├── cache.test.js
+│   │   │   ├── cef.test.js
+│   │   │   ├── cookies.test.js
+│   │   │   ├── db.test.js
+│   │   │   ├── devtools.test.js
+│   │   │   ├── health.test.js
+│   │   │   ├── javascript.test.js
+│   │   │   ├── logs.test.js
+│   │   │   ├── middleware.test.js
+│   │   │   ├── monitoring.test.js
+│   │   │   ├── pdf.test.js
+│   │   │   ├── performance.test.js
+│   │   │   ├── pip.test.js
+│   │   │   ├── prerender.test.js
+│   │   │   ├── reader.test.js
+│   │   │   ├── screenshot.test.js
+│   │   │   ├── security.test.js
+│   │   │   ├── services.test.js
+│   │   │   ├── translate.test.js
+│   │   │   ├── utils.test.js
+│   │   │   └── websocket.test.js
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   ├── .env
+│   │   ├── .eslintrc.js
+│   │   └── .prettierrc.js
+│   ├── Dockerfile
+│   └── docker-compose.yml
+├── frontend/
+│   ├── src/
+│   │   ├── index.tsx
+│   │   ├── components/
+│   │   │   ├── Tab.tsx
+│   │   │   ├── AddressBar.tsx
+│   │   │   ├── Bookmarks.tsx
+│   │   │   ├── History.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Downloads.tsx
+│   │   │   ├── PdfViewer.tsx
+│   │   │   ├── Translate.tsx
+│   │   │   ├── Screenshot.tsx
+│   │   │   ├── Pip.tsx
+│   │   │   ├── Reader.tsx
+│   │   │   ├── DevTools.tsx
+│   │   │   ├── CookieSettings.tsx
+│   │   │   ├── JavascriptSettings.tsx
+│   │   │   ├── CacheSettings.tsx
+│   │   │   ├── PrerenderSettings.tsx
+│   │   │   ├── SecuritySettings.tsx
+│   │   │   ├── PerformanceSettings.tsx
+│   │   │   ├── Monitoring.tsx
+│   │   │   ├── Logs.tsx
+│   │   │   ├── Health.tsx
+│   │   │   └── Backup.tsx
+│   │   ├── hooks/
+│   │   │   ├── useWebSocket.ts
+│   │   │   ├── useApi.ts
+│   │   │   ├── useTab.ts
+│   │   │   ├── useBookmarks.ts
+│   │   │   ├── useHistory.ts
+│   │   │   ├── useSettings.ts
+│   │   │   ├── useDownloads.ts
+│   │   │   ├── usePdfViewer.ts
+│   │   │   ├── useTranslate.ts
+│   │   │   ├── useScreenshot.ts
+│   │   │   ├── usePip.ts
+│   │   │   ├── useReader.ts
+│   │   │   ├── useDevTools.ts
+│   │   │   ├── useCookieSettings.ts
+│   │   │   ├── useJavascriptSettings.ts
+│   │   │   ├── useCacheSettings.ts
+│   │   │   ├── usePrerenderSettings.ts
+│   │   │   ├── useSecuritySettings.ts
+│   │   │   ├── usePerformanceSettings.ts
+│   │   │   ├── useMonitoring.ts
+│   │   │   ├── useLogs.ts
+│   │   │   ├── useHealth.ts
+│   │   │   └── useBackup.ts
+│   │   ├── utils/
+│   │   │   ├── api.ts
+│   │   │   ├── canvas.ts
+│   │   │   ├── websocket.ts
+│   │   │   ├── storage.ts
+│   │   │   ├── date.ts
+│   │   │   ├── string.ts
+│   │   │   ├── number.ts
+│   │   │   ├── object.ts
+│   │   │   ├── array.ts
+│   │   │   ├── dom.ts
+│   │   │   ├── event.ts
+│   │   │   ├── error.ts
+│   │   │   ├── logger.ts
+│   │   │   ├── i18n.ts
+│   │   │   ├── theme.ts
+│   │   │   ├── security.ts
+│   │   │   ├── performance.ts
+│   │   │   ├── monitoring.ts
+│   │   │   ├── logs.ts
+│   │   │   ├── health.ts
+│   │   │   └── backup.ts
+│   │   ├── styles/
+│   │   │   ├── global.scss
+│   │   │   ├── components/
+│   │   │   │   ├── Tab.module.scss
+│   │   │   │   ├── AddressBar.module.scss
+│   │   │   │   ├── Bookmarks.module.scss
+│   │   │   │   ├── History.module.scss
+│   │   │   │   ├── Settings.module.scss
+│   │   │   │   ├── Downloads.module.scss
+│   │   │   │   ├── PdfViewer.module.scss
+│   │   │   │   ├── Translate.module.scss
+│   │   │   │   ├── Screenshot.module.scss
+│   │   │   │   ├── Pip.module.scss
+│   │   │   │   ├── Reader.module.scss
+│   │   │   │   ├── DevTools.module.scss
+│   │   │   │   ├── CookieSettings.module.scss
+│   │   │   │   ├── JavascriptSettings.module.scss
+│   │   │   │   ├── CacheSettings.module.scss
+│   │   │   │   ├── PrerenderSettings.module.scss
+│   │   │   │   ├── SecuritySettings.module.scss
+│   │   │   │   ├── PerformanceSettings.module.scss
+│   │   │   │   ├── Monitoring.module.scss
+│   │   │   │   ├── Logs.module.scss
+│   │   │   │   ├── Health.module.scss
+│   │   │   │   └── Backup.module.scss
+│   │   │   ├── routes/
+│   │   │   │   ├── Home.module.scss
+│   │   │   │   ├── Settings.module.scss
+│   │   │   │   └── ...
+│   │   │   └── utils/
+│   │   │       ├── api.module.scss
+│   │   │       ├── canvas.module.scss
+│   │   │       ├── websocket.module.scss
+│   │   │       ├── storage.module.scss
+│   │   │       ├── date.module.scss
+│   │   │       ├── string.module.scss
+│   │   │       ├── number.module.scss
+│   │   │       ├── object.module.scss
+│   │   │       ├── array.module.scss
+│   │   │       ├── dom.module.scss
+│   │   │       ├── event.module.scss
+│   │   │       ├── error.module.scss
+│   │   │       ├── logger.module.scss
+│   │   │       ├── i18n.module.scss
+│   │   │       ├── theme.module.scss
+│   │   │       ├── security.module.scss
+│   │   │       ├── performance.module.scss
+│   │   │       ├── monitoring.module.scss
+│   │   │       ├── logs.module.scss
+│   │   │       ├── health.module.scss
+│   │   │       └── backup.module.scss
+│   │   ├── assets/
+│   │   │   ├── logo.png
+│   │   │   ├── favicon.ico
+│   │   │   ├── icon-192x192.png
+│   │   │   ├── icon-512x512.png
+│   │   │   ├── loading.gif
+│   │   │   ├── error.png
+│   │   │   ├── warning.png
+│   │   │   ├── success.png
+│   │   │   ├── info.png
+│   │   │   ├── dark-mode.svg
+│   │   │   ├── light-mode.svg
+│   │   │   ├── translate.svg
+│   │   │   ├── screenshot.svg
+│   │   │   ├── pip.svg
+│   │   │   ├── reader.svg
+│   │   │   ├── devtools.svg
+│   │   │   ├── cookie.svg
+│   │   │   ├── javascript.svg
+│   │   │   ├── cache.svg
+│   │   │   ├── prerender.svg
+│   │   │   ├── security.svg
+│   │   │   ├── performance.svg
+│   │   │   ├── monitoring.svg
+│   │   │   ├── logs.svg
+│   │   │   ├── health.svg
+│   │   │   └── backup.svg
+│   │   ├── routes/
+│   │   │   ├── Home.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Bookmarks.tsx
+│   │   │   ├── History.tsx
+│   │   │   ├── Downloads.tsx
+│   │   │   ├── PdfViewer.tsx
+│   │   │   ├── Translate.tsx
+│   │   │   ├── Screenshot.tsx
+│   │   │   ├── Pip.tsx
+│   │   │   ├── Reader.tsx
+│   │   │   ├── DevTools.tsx
+│   │   │   ├── CookieSettings.tsx
+│   │   │   ├── JavascriptSettings.tsx
+│   │   │   ├── CacheSettings.tsx
+│   │   │   ├── PrerenderSettings.tsx
+│   │   │   ├── SecuritySettings.tsx
+│   │   │   ├── PerformanceSettings.tsx
+│   │   │   ├── Monitoring.tsx
+│   │   │   ├── Logs.tsx
+│   │   │   ├── Health.tsx
+│   │   │   └── Backup.tsx
+│   │   ├── stores/
+│   │   │   ├── tabStore.ts
+│   │   │   ├── bookmarksStore.ts
+│   │   │   ├── historyStore.ts
+│   │   │   ├── settingsStore.ts
+│   │   │   ├── downloadsStore.ts
+│   │   │   ├── pdfViewerStore.ts
+│   │   │   ├── translateStore.ts
+│   │   │   ├── screenshotStore.ts
+│   │   │   ├── pipStore.ts
+│   │   │   ├── readerStore.ts
+│   │   │   ├── devToolsStore.ts
+│   │   │   ├── cookieSettingsStore.ts
+│   │   │   ├── javascriptSettingsStore.ts
+│   │   │   ├── cacheSettingsStore.ts
+│   │   │   ├── prerenderSettingsStore.ts
+│   │   │   ├── securitySettingsStore.ts
+│   │   │   ├── performanceSettingsStore.ts
+│   │   │   ├── monitoringStore.ts
+│   │   │   ├── logsStore.ts
+│   │   │   └── healthStore.ts
+│   │   ├── tests/
+│   │   │   ├── components/
+│   │   │   │   ├── Tab.test.tsx
+│   │   │   │   ├── AddressBar.test.tsx
+│   │   │   │   ├── Bookmarks.test.tsx
+│   │   │   │   ├── History.test.tsx
+│   │   │   │   ├── Settings.test.tsx
+│   │   │   │   ├── Downloads.test.tsx
+│   │   │   │   ├── PdfViewer.test.tsx
+│   │   │   │   ├── Translate.test.tsx
+│   │   │   │   ├── Screenshot.test.tsx
+│   │   │   │   ├── Pip.test.tsx
+│   │   │   │   ├── Reader.test.tsx
+│   │   │   │   ├── DevTools.test.tsx
+│   │   │   │   ├── CookieSettings.test.tsx
+│   │   │   │   ├── JavascriptSettings.test.tsx
+│   │   │   │   ├── CacheSettings.test.tsx
+│   │   │   │   ├── PrerenderSettings.test.tsx
+│   │   │   │   ├── SecuritySettings.test.tsx
+│   │   │   │   ├── PerformanceSettings.test.tsx
+│   │   │   │   ├── Monitoring.test.tsx
+│   │   │   │   ├── Logs.test.tsx
+│   │   │   │   └── Health.test.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useWebSocket.test.ts
+│   │   │   │   ├── useApi.test.ts
+│   │   │   │   ├── useTab.test.ts
+│   │   │   │   ├── useBookmarks.test.ts
+│   │   │   │   ├── useHistory.test.ts
+│   │   │   │   ├── useSettings.test.ts
+│   │   │   │   ├── useDownloads.test.ts
+│   │   │   │   ├── usePdfViewer.test.ts
+│   │   │   │   ├── useTranslate.test.ts
+│   │   │   │   ├── useScreenshot.test.ts
+│   │   │   │   ├── usePip.test.ts
+│   │   │   │   ├── useReader.test.ts
+│   │   │   │   ├── useDevTools.test.ts
+│   │   │   │   ├── useCookieSettings.test.ts
+│   │   │   │   ├── useJavascriptSettings.test.ts
+│   │   │   │   ├── useCacheSettings.test.ts
+│   │   │   │   ├── usePrerenderSettings.test.ts
+│   │   │   │   ├── useSecuritySettings.test.ts
+│   │   │   │   ├── usePerformanceSettings.test.ts
+│   │   │   │   ├── useMonitoring.test.ts
+│   │   │   │   ├── useLogs.test.ts
+│   │   │   │   └── useHealth.test.ts
+│   │   │   ├── utils/
+│   │   │   │   ├── api.test.ts
+│   │   │   │   ├── canvas.test.ts
+│   │   │   │   ├── websocket.test.ts
+│   │   │   │   ├── storage.test.ts
+│   │   │   │   ├── date.test.ts
+│   │   │   │   ├── string.test.ts
+│   │   │   │   ├── number.test.ts
+│   │   │   │   ├── object.test.ts
+│   │   │   │   ├── array.test.ts
+│   │   │   │   ├── dom.test.ts
+│   │   │   │   ├── event.test.ts
+│   │   │   │   ├── error.test.ts
+│   │   │   │   ├── logger.test.ts
+│   │   │   │   ├── i18n.test.ts
+│   │   │   │   ├── theme.test.ts
+│   │   │   │   ├── security.test.ts
+│   │   │   │   ├── performance.test.ts
+│   │   │   │   ├── monitoring.test.ts
+│   │   │   │   ├── logs.test.ts
+│   │   │   │   ├── health.test.ts
+│   │   │   │   └── backup.test.ts
+│   │   │   ├── routes/
+│   │   │   │   ├── Home.test.tsx
+│   │   │   │   ├── Settings.test.tsx
+│   │   │   │   └── ...
+│   │   │   └── stores/
+│   │   │       ├── tabStore.test.ts
+│   │   │       ├── bookmarksStore.test.ts
+│   │   │       ├── historyStore.test.ts
+│   │   │       ├── settingsStore.test.ts
+│   │   │       ├── downloadsStore.test.ts
+│   │   │       ├── pdfViewerStore.test.ts
+│   │   │       ├── translateStore.test.ts
+│   │   │       ├── screenshotStore.test.ts
+│   │   │       ├── pipStore.test.ts
+│   │   │       ├── readerStore.test.ts
+│   │   │       ├── devToolsStore.test.ts
+│   │   │       ├── cookieSettingsStore.test.ts
+│   │   │       ├── javascriptSettingsStore.test.ts
+│   │   │       ├── cacheSettingsStore.test.ts
+│   │   │       ├── prerenderSettingsStore.test.ts
+│   │   │       ├── securitySettingsStore.test.ts
+│   │   │       ├── performanceSettingsStore.test.ts
+│   │   │       ├── monitoringStore.test.ts
+│   │   │       ├── logsStore.test.ts
+│   │   │       └── healthStore.test.ts
+│   ├── public/
+│   │   ├── index.html
+│   │   ├── manifest.json
+│   │   ├── robots.txt
+│   │   ├── sitemap.xml
+│   │   ├── sw.js
+│   │   ├── 404.html
+│   │   └── 500.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   ├── webpack.config.js
+│   ├── .eslintrc.js
+│   └── .prettierrc.js
+├── cef/
+│   ├── src/
+│   │   ├── browser_process/
+│   │   │   ├── browser_process_handler.cc
+│   │   │   ├── browser_context.cc
+│   │   │   ├── browser_main.cc
+│   │   │   ├── cookie_manager.cc
+│   │   │   ├── download_manager.cc
+│   │   │   ├── geolocation.cc
+│   │   │   ├── media_router.cc
+│   │   │   ├── permission_manager.cc
+│   │   │   ├── print_settings.cc
+│   │   │   ├── proxy_handler.cc
+│   │   │   ├── resource_context.cc
+│   │   │   ├── storage_partition.cc
+│   │   │   ├── thread_util.cc
+│   │   │   └── url_request_context.cc
+│   │   ├── renderer_process/
+│   │   │   ├── renderer_process_handler.cc
+│   │   │   ├── extension_manager.cc
+│   │   │   ├── render_frame_observer.cc
+│   │   │   ├── render_process_observer.cc
+│   │   │   ├── script_context.cc
+│   │   │   ├── v8_handler.cc
+│   │   │   ├── web_view_observer.cc
+│   │   │   └── worker_observer.cc
+│   │   ├── common/
+│   │   │   ├── app_constants.cc
+│   │   │   ├── cef_messages.cc
+│   │   │   ├── command_line_util.cc
+│   │   │   ├── file_util.cc
+│   │   │   ├── ipc_messages.cc
+│   │   │   ├── platform_util.cc
+│   │   │   ├── resource_util.cc
+│   │   │   ├── string_util.cc
+│   │   │   └── thread_util.cc
+│   │   ├── cef_app.cc
+│   │   ├── cef_client.cc
+│   │   ├── cef_context.cc
+│   │   ├── cef_handler.cc
+│   │   ├── cef_life_span_handler.cc
+│   │   ├── cef_load_handler.cc
+│   │   ├── cef_render_process_handler.cc
+│   │   ├── cef_request_handler.cc
+│   │   ├── cef_resource_bundle_handler.cc
+│   │   ├── cef_resource_handler.cc
+│   │   ├── cef_scheme_handler_factory.cc
+│   │   ├── cef_url_request_client.cc
+│   │   ├── cef_v8_accessor.cc
+│   │   ├── cef_v8_context.cc
+│   │   ├── cef_v8_handler.cc
+│   │   ├── cef_v8_value.cc
+│   │   ├── cef_web_plugin.cc
+│   │   ├── main.cc
+│   │   ├── main_delegate.cc
+│   │   └── scheme_handler.cc
+│   ├── include/
+│   │   ├── cef_app.h
+│   │   ├── cef_base.h
+│   │   ├── cef_browser.h
+│   │   ├── cef_callback.h
+│   │   ├── cef_client.h
+│   │   ├── cef_command_line.h
+│   │   ├── cef_context.h
+│   │   ├── cef_cookie.h
+│   │   ├── cef_drag_data.h
+│   │   ├── cef_frame.h
+│   │   ├── cef_geolocation.h
+│   │   ├── cef_i18n.h
+│   │   ├── cef_image.h
+│   │   ├── cef_keyboard_handler.h
+│   │   ├── cef_life_span_handler.h
+│   │   ├── cef_load_handler.h
+│   │   ├── cef_menu_model.h
+│   │   ├── cef_mouse_cursor.h
+│   │   ├── cef_origin.h
+│   │   ├── cef_pdf.h
+│   │   ├── cef_process_util.h
+│   │   ├── cef_render_process_handler.h
+│   │   ├── cef_request.h
+│   │   ├── cef_request_context.h
+│   │   ├── cef_request_handler.h
+│   │   ├── cef_resource_bundle.h
+│   │   ├── cef_resource_bundle_handler.h
+│   │   ├── cef_resource_handler.h
+│   │   ├── cef_response.h
+│   │   ├── cef_scheme.h
+│   │   ├── cef_scheme_handler_factory.h
+│   │   ├── cef_ssl_info.h
+│   │   ├── cef_stream.h
+│   │   ├── cef_string_list.h
+│   │   ├── cef_string_map.h
+│   │   ├── cef_string_multimap.h
+│   │   ├── cef_string_visitor.h
+│   │   ├── cef_task.h
+│   │   ├── cef_trace.h
+│   │   ├── cef_url.h
+│   │   ├── cef_url_request.h
+│   │   ├── cef_url_request_client.h
+│   │   ├── cef_v8.h
+│   │   ├── cef_values.h
+│   │   ├── cef_version.h
+│   │   ├── cef_web_plugin.h
+│   │   ├── cef_xml_reader.h
+│   │   └── wrapper/
+│   │       ├── cef_closure_task.h
+│   │       ├── cef_helpers.h
+│   │       ├── cef_list_value.h
+│   │       ├── cef_scoped_temp_dir.h
+│   │       ├── cef_scoped_temp_file.h
+│   │       ├── cef_scoped_temp_file_map.h
+│   │       ├── cef_scoped_temp_stream.h
+│   │       ├── cef_scoped_temp_string.h
+│   │       ├── cef_string_util.h
+│   │       ├── cef_trace_event.h
+│   │       └── cef_weak_ptr.h
+│   ├── build/
+│   │   ├── CMakeLists.txt
+│   │   ├── cef_variables.cmake
+│   │   ├── cef_version.cmake
+│   │   ├── install_cef.cmake
+│   │   ├── install_headers.cmake
+│   │   └── install_resources.cmake
+│   ├── resources/
+│   │   ├── cef.pak
+│   │   ├── cef_100_percent.pak
+│   │   ├── cef_200_percent.pak
+│   │   ├── devtools_resources.pak
+│   │   ├── locales/
+│   │   │   ├── en-US.pak
+│   │   │   ├── ja.pak
+│   │   │   └── ...
+│   │   └── natives_blob.bin
+│   └── third_party/
+│       ├── blink/
+│       ├── boringssl/
+│       ├── brotli/
+│       ├── crashpad/
+│       ├── freetype/
+│       ├── icu/
+│       ├── libevent/
+│       ├── libjpeg_turbo/
+       ├── libpng/
+       ├── libwebp/
+       ├── minizip/
+       ├── protobuf/
+       ├── skia/
+       ├── sqlite/
+       ├── usrsctp/
+       ├── v8/
+       ├── webrtc/
+       └── zlib/
+├── nginx/
+│   ├── nginx.conf
+│   ├── ssl/
+│   │   ├── certificate.crt
+│   │   └── private.key
+├── postgres/
+│   ├── schema.sql
+│   ├── seed.sql
+├── scripts/
+│   ├── build.sh
+│   ├── deploy.sh
+│   ├── start.sh
+│   ├── stop.sh
+│   ├── backup.sh
+│   ├── restore.sh
+│   ├── migrate.sh
+│   ├── test.sh
+│   ├── lint.sh
+│   ├── format.sh
+│   ├── analyze.sh
+│   ├── docker-build.sh
+│   ├── docker-compose-up.sh
+│   └── docker-compose-down.sh
+├── docs/
+│   ├── specification.md
+│   ├── api.md
+│   ├── architecture.md
+│   ├── database.md
+│   ├── security.md
+│   ├── performance.md
+│   ├── monitoring.md
+│   ├── logs.md
+│   ├── health.md
+│   ├── backup.md
+│   ├── development.md
+│   ├── deployment.md
+│   ├── testing.md
+│   ├── coding-standards.md
+│   ├── contributors.md
+│   ├── license.md
+│   ├── changelog.md
+│   ├── faq.md
+│   └── troubleshooting.md
+├── tests/
+│   ├── e2e/
+│   │   ├── home.spec.js
+│   │   ├── bookmarks.spec.js
+│   │   ├── history.spec.js
+│   │   ├── settings.spec.js
+│   │   ├── downloads.spec.js
+│   │   ├── pdf-viewer.spec.js
+│   │   ├── translate.spec.js
+│   │   ├── screenshot.spec.js
+│   │   ├── pip.spec.js
+│   │   ├── reader.spec.js
+│   │   ├── devtools.spec.js
+│   │   ├── cookie-settings.spec.js
+│   │   ├── javascript-settings.spec.js
+│   │   ├── cache-settings.spec.js
+│   │   ├── prerender-settings.spec.js
+│   │   ├── security-settings.spec.js
+│   │   ├── performance-settings.spec.js
+│   │   ├── monitoring.spec.js
+│   │   ├── logs.spec.js
+│   │   └── health.spec.js
+│   ├── unit/
+│   │   ├── backend/
+│   │   │   ├── api.test.js
+│   │   │   ├── db.test.js
+│   │   │   ├── services.test.js
+│   │   │   ├── utils.test.js
+│   │   │   ├── middleware.test.js
+│   │   │   ├── websocket.test.js
+│   │   │   ├── cef.test.js
+│   │   │   ├── pdf.test.js
+│   │   │   ├── translate.test.test.js
+│   │   │   ├── screenshot.test.js
+│   │   │   ├── pip.test.js
+│   │   │   ├── reader.test.js
+│   │   │   ├── devtools.test.js
+│   │   │   ├── cookies.test.js
+│   │   │   ├── javascript.test.js
+│   │   │   ├── prerender.test.js
+│   │   │   ├── security.test.js
+│   │   │   ├── performance.test.js
+│   │   │   ├── monitoring.test.js
+│   │   │   ├── logs.test.js
+│   │   │   ├── health.test.js
+│   │   │   └── backup.test.js
+│   │   ├── frontend/
+│   │   │   ├── components/
+│   │   │   │   ├── Tab.test.tsx
+│   │   │   │   ├── AddressBar.test.tsx
+│   │   │   │   ├── Bookmarks.test.tsx
+│   │   │   │   ├── History.test.tsx
+│   │   │   │   ├── Settings.test.tsx
+│   │   │   │   ├── Downloads.test.tsx
+│   │   │   │   ├── PdfViewer.test.tsx
+│   │   │   │   ├── Translate.test.tsx
+│   │   │   │   ├── Screenshot.test.tsx
+│   │   │   │   ├── Pip.test.tsx
+│   │   │   │   ├── Reader.test.tsx
+│   │   │   │   ├── DevTools.test.tsx
+│   │   │   │   ├── CookieSettings.test.tsx
+│   │   │   │   ├── JavascriptSettings.test.tsx
+│   │   │   │   ├── CacheSettings.test.tsx
+│   │   │   │   ├── PrerenderSettings.test.tsx
+│   │   │   │   ├── SecuritySettings.test.tsx
+│   │   │   │   ├── PerformanceSettings.test.tsx
+│   │   │   │   ├── Monitoring.test.tsx
+│   │   │   │   ├── Logs.test.tsx
+│   │   │   │   └── Health.test.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useWebSocket.test.ts
+│   │   │   │   ├── useApi.test.ts
+│   │   │   │   ├── useTab.test.ts
+│   │   │   │   ├── useBookmarks.test.ts
+│   │   │   │   ├── useHistory.test.ts
+│   │   │   │   ├── useSettings.test.ts
+│   │   │   │   ├── useDownloads.test.ts
+│   │   │   │   ├── usePdfViewer.test.ts
+│   │   │   │   ├── useTranslate.test.ts
+│   │   │   │   ├── useScreenshot.test.ts
+│   │   │   │   ├── usePip.test.ts
+│   │   │   │   ├── useReader.test.ts
+│   │   │   │   ├── useDevTools.test.ts
+│   │   │   │   ├── useCookieSettings.test.ts
+│   │   │   │   ├── useJavascriptSettings.test.ts
+│   │   │   │   ├── useCacheSettings.test.ts
+│   │   │   │   ├── usePrerenderSettings.test.ts
+│   │   │   │   ├── useSecuritySettings.test.ts
+│   │   │   │   ├── usePerformanceSettings.test.ts
+│   │   │   │   ├── useMonitoring.test.ts
+│   │   │   │   ├── useLogs.test.ts
+│   │   │   │   └── useHealth.test.ts
+│   │   │   ├── utils/
+│   │   │   │   ├── api.test.ts
+│   │   │   │   ├── canvas.test.ts
+│   │   │   │   ├── websocket.test.ts
+│   │   │   │   ├── storage.test.ts
+│   │   │   │   ├── date.test.ts
+│   │   │   │   ├── string.test.ts
+│   │   │   │   ├── number.test.ts
+│   │   │   │   ├── object.test.ts
+│   │   │   │   ├── array.test.ts
+│   │   │   │   ├── dom.test.ts
+│   │   │   │   ├── event.test.ts
+│   │   │   │   ├── error.test.ts
+│   │   │   │   ├── logger.test.ts
+│   │   │   │   ├── i18n.test.ts
+│   │   │   │   ├── theme.test.ts
+│   │   │   │   ├── security.test.ts
+│   │   │   │   ├── performance.test.ts
+│   │   │   │   ├── monitoring.test.ts
+│   │   │   │   ├── logs.test.ts
+│   │   │   │   └── health.test.ts
+│   │   │   ├── routes/
+│   │   │   │   ├── Home.test.tsx
+│   │   │   │   ├── Settings.test.tsx
+│   │   │   │   └── ...
+│   │   │   └── stores/
+│   │   │       ├── tabStore.test.ts
+       ├── bookmarksStore.test.ts
+│   │   │       ├── historyStore.test.ts
+│   │   │       ├── settingsStore.test.ts
+│   │   │       ├── downloadsStore.test.ts
+│   │   │       ├── pdfViewerStore.test.ts
+│   │   │       ├── translateStore.test.ts
+│   │   │       ├── screenshotStore.test.ts
+│   │   │       ├── pipStore.test.ts
+│   │   │       ├── readerStore.test.ts
+│   │   │       ├── devToolsStore.test.ts
+│   │   │       ├── cookieSettingsStore.test.ts
+│   │   │       ├── javascriptSettingsStore.test.ts
+│   │   │       ├── cacheSettingsStore.test.ts
+│   │   │       ├── prerenderSettingsStore.test.ts
+│   │   │       ├── securitySettingsStore.test.ts
+│   │   │       ├── performanceSettingsStore.test.ts
+│   │   │       ├── monitoringStore.test.ts
+│   │   │       ├── logsStore.test.ts
+│   │   │       └── healthStore.test.ts
