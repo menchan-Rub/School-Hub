@@ -21,9 +21,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./app/*"
-      ]
+      "@/*": ["./*"]
     },
     "types": [
       "jest",
