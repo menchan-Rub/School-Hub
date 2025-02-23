@@ -24,3 +24,5 @@ Browser/cef/third_party/cef/cef_binary_133.4.2+g0852ba6+chromium-133.0.6943.127_
 .next
 Browser/cef/third_party/cef/Release/libcef.so
 Browser/cef/third_party/cef/Release/libcef.so
+.env
+.env
