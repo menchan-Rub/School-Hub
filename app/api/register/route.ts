@@ -1,56 +1,63 @@
 import { NextResponse } from "next/server"
-import { hash } from "bcryptjs"
-import { prisma } from "@/lib/prisma"
-import { StreamChat } from "stream-chat"
+import { hash } from "bcrypt"
+import { db } from "@/lib/db"
+import { NextRequest } from "next/server"
 
-const serverClient = StreamChat.getInstance(
-  process.env.NEXT_PUBLIC_STREAM_KEY!,
-  process.env.STREAM_SECRET_KEY!
-)
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json()
+    const body = await req.json()
+    const { email, password, name } = body
 
-    if (!name || !email || !password) {
-      return new NextResponse("必須項目が入力されていません", { status: 400 })
+    console.log("登録開始:", { email, name })
+
+    if (!email || !password || !name) {
+      return new NextResponse(
+        JSON.stringify({ error: "必須項目が不足しています" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      )
     }
 
     // メールアドレスの重複チェック
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await db.user.findUnique({
       where: { email }
     })
 
     if (existingUser) {
-      return new NextResponse("このメールアドレスは既に登録されています", { status: 400 })
+      console.log("重複するメールアドレス:", email)
+      return new NextResponse(
+        JSON.stringify({ error: "このメールアドレスは既に使用されています" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      )
     }
 
-    const hashedPassword = await hash(password, 10)
+    const hashedPassword = await hash(password, 12)
+    console.log("パスワードハッシュ化完了")
 
-    // Prismaでユーザーを作成
-    const user = await prisma.user.create({
+    const user = await db.user.create({
       data: {
-        name,
         email,
-        password: hashedPassword,
+        name,
+        passwordHash: hashedPassword,
         role: "user",
-        status: "active"
       }
     })
 
-    // Stream Chatにもユーザーを作成
-    await serverClient.upsertUser({
-      id: user.id,
-      name: user.name,
-      role: "user",
+    console.log("ユーザー作成成功:", { id: user.id, email: user.email })
+
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
     })
-
-    const { password: _, ...userWithoutPassword } = user
-    return NextResponse.json(userWithoutPassword)
-
   } catch (error) {
-    console.error("[REGISTER_POST]", error)
-    return new NextResponse("ユーザー登録に失敗しました", { status: 500 })
+    console.error("ユーザー登録エラー:", error)
+    return new NextResponse(
+      JSON.stringify({ error: "内部サーバーエラー" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    )
   }
 }
 

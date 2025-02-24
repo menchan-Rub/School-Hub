@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { LoginForm } from "@/components/auth/LoginForm"
+import { LoginForm } from "./components/auth/LoginForm"
 import { UserDashboard } from "@/components/dashboard/user-dashboard"
 
 export default function HomePage() {

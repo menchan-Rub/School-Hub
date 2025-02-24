@@ -1,7 +1,3 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:09381b2eed73943c75f12ab43bbe68d579ad1a5c0e3a1d24f1f3702b036f3b86
-size 2461
-
 import { EventEmitter } from 'events';
 
 type MessageHandler = (data: any) => void;

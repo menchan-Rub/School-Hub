@@ -5,19 +5,19 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare, Users, Globe, Settings, Shield, UserCircle } from "lucide-react";
 
 interface UserDashboardProps {
-  onChatOpen: () => void;
-  onFriendsOpen: () => void;
   onBrowserOpen: () => void;
   onSettingsOpen: () => void;
+  onChatOpen: () => void;
+  onFriendsOpen: () => void;
   onAdminOpen?: () => void;
   isAdmin?: boolean;
 }
 
-export function UserDashboard({ 
-  onChatOpen, 
-  onFriendsOpen, 
-  onBrowserOpen, 
+export function UserDashboard({
+  onBrowserOpen,
   onSettingsOpen,
+  onChatOpen,
+  onFriendsOpen,
   onAdminOpen,
   isAdmin = false
 }: UserDashboardProps) {
