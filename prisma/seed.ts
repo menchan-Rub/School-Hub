@@ -4,84 +4,35 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // 管理者ロールの作成
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'super_admin' },
-    update: {
-      permissions: {
-        admin: true,
-        manageUsers: true,
-        manageRoles: true,
-        security: ['view', 'edit'],
-        users: ['view', 'create', 'edit', 'delete'],
-        announcements: ['view', 'create', 'edit', 'delete'],
-        settings: ['view', 'edit'],
-        audit_logs: ['view'],
-        messages: ['view', 'delete']
-      }
-    },
-    create: {
-      name: 'super_admin',
-      permissions: {
-        admin: true,
-        manageUsers: true,
-        manageRoles: true,
-        security: ['view', 'edit'],
-        users: ['view', 'create', 'edit', 'delete'],
-        announcements: ['view', 'create', 'edit', 'delete'],
-        settings: ['view', 'edit'],
-        audit_logs: ['view'],
-        messages: ['view', 'delete']
-      }
-    }
-  });
+  console.log('シードを開始します...');
 
-  // 一般ユーザーロールの作成
-  const userRole = await prisma.role.upsert({
-    where: { name: 'user' },
-    update: {
-      permissions: {
-        users: ['view'],
-        announcements: ['view'],
-        settings: ['view', 'edit']
-      }
-    },
-    create: {
-      name: 'user',
-      permissions: {
-        users: ['view'],
-        announcements: ['view'],
-        settings: ['view', 'edit']
-      }
-    }
-  });
+  // 特権ユーザー（管理者）の作成
+  const adminPassword = process.env.ADMIN_PASSWORD || 'iromochi218';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-  // 管理者ユーザーの作成
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin';
-  const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
-  
-  await prisma.user.upsert({
-    where: { email: process.env.ADMIN_EMAIL || 'admin@school-hub.com' },
+  const admin = await prisma.user.upsert({
+    where: { 
+      email: process.env.ADMIN_EMAIL || 'admin@school-hub.com'
+    },
     update: {
-      roleId: adminRole.id,
-      password: hashedAdminPassword
+      passwordHash: hashedPassword,
+      role: 'super_admin'
     },
     create: {
       email: process.env.ADMIN_EMAIL || 'admin@school-hub.com',
-      name: 'Administrator',
-      password: hashedAdminPassword,
-      roleId: adminRole.id
+      name: 'システム管理者',
+      passwordHash: hashedPassword,
+      role: 'super_admin'
     }
   });
 
-  console.log('Seed completed successfully');
-  console.log('Admin role ID:', adminRole.id);
-  console.log('User role ID:', userRole.id);
+  console.log('特権ユーザー（管理者）を作成/更新しました:', admin.email);
+  console.log('シードが完了しました');
 }
 
 main()
-  .catch(e => {
-    console.error('Error during seeding:', e);
+  .catch((e) => {
+    console.error('シード中にエラーが発生しました:', e);
     process.exit(1);
   })
   .finally(async () => {

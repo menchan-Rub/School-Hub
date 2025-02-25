@@ -1,57 +1,24 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { PerformanceUtils } from '@/browser/utils/performance-utils';
 
-export const GET = withAdminAuth(async () => {
-  try {
-    const [totalUsers, activeUsers, totalHistory, blockedUrls] = await Promise.all([
-      // 総ユーザー数
-      prisma.user.count(),
-      
-      // アクティブユーザー数（過去7日間）
-      prisma.browserHistory.groupBy({
-        by: ['userId'],
-        where: {
-          timestamp: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          }
+export async function GET() {
+    try {
+        const session = await getServerSession(authOptions);
+        
+        if (!session?.user?.role || !['super_admin', 'admin'].includes(session.user.role)) {
+            console.error('Unauthorized access attempt:', session?.user?.email);
+            return new NextResponse('Unauthorized', { status: 401 });
         }
-      }).then(users => users.length),
 
-      // 総履歴数
-      prisma.browserHistory.count(),
-
-      // ブロックされたURL数
-      prisma.browserHistory.count({
-        where: {
-          status: 'blocked'
-        }
-      })
-    ]);
-
-    // 人気のドメイン
-    const popularDomains = await prisma.$queryRaw`
-      SELECT 
-        regexp_replace(url, '^https?://([^/]+).*', '\\1') as domain,
-        COUNT(*) as visits
-      FROM "BrowserHistory"
-      GROUP BY domain
-      ORDER BY visits DESC
-      LIMIT 10
-    `;
-
-    return NextResponse.json({
-      totalUsers,
-      activeUsers,
-      totalHistory,
-      blockedUrls,
-      popularDomains
-    });
-  } catch (error) {
-    console.error('Stats fetch error:', error);
-    return NextResponse.json(
-      { error: '統計データの取得に失敗しました' },
-      { status: 500 }
-    );
-  }
-}); 
+        const stats = await PerformanceUtils.getBrowserStats();
+        return NextResponse.json(stats);
+    } catch (error) {
+        console.error('Failed to get browser stats:', error);
+        return new NextResponse(
+            JSON.stringify({ error: 'Internal Server Error' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+} 

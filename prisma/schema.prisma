@@ -35,17 +35,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String         @unique
   emailVerified DateTime?
   image         String?
   passwordHash  String
-  role          String    @default("user")
+  role          String         @default("user")
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  userSessions  UserSession[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  readAnnouncements AnnouncementRead[]
 }
 
 model VerificationToken {
@@ -54,4 +56,38 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model UserSession {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  duration  Int?      // セッション時間（分）
+
+  @@index([userId])
+  @@index([startTime])
+}
+
+model Announcement {
+  id          String            @id @default(cuid())
+  title       String
+  content     String
+  priority    Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  readBy      AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String      @id @default(cuid())
+  announcementId String
+  userId         String
+  readAt         DateTime    @default(now())
+  
+  announcement   Announcement @relation(fields: [announcementId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+
+  @@unique([announcementId, userId])
 } 

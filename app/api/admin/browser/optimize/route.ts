@@ -5,25 +5,15 @@ import { PerformanceUtils } from '@/browser/utils/performance-utils';
 
 export async function POST() {
     try {
-        // セッションの確認
         const session = await getServerSession(authOptions);
-        if (!session?.user?.role === 'ADMIN') {
+        if (!session?.user?.role || !['super_admin', 'admin'].includes(session.user.role)) {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        // メモリとCPUの最適化を実行
-        await PerformanceUtils.optimizeForLowMemory();
-        await PerformanceUtils.optimizeForLowCPU();
-
-        // 最適化後のメトリクスを取得
-        const metrics = PerformanceUtils.createPerformanceMetrics();
-
-        return NextResponse.json({
-            success: true,
-            metrics
-        });
+        const result = await PerformanceUtils.optimizePerformance();
+        return NextResponse.json(result);
     } catch (error) {
-        console.error('[BROWSER_OPTIMIZE_ERROR]', error);
-        return new NextResponse('Internal Error', { status: 500 });
+        console.error('Failed to optimize browser performance:', error);
+        return new NextResponse('Internal Server Error', { status: 500 });
     }
 } 

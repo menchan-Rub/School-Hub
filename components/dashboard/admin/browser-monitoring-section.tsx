@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { Globe, Clock, Users } from 'lucide-react';
 
 interface BrowserMetrics {
     timestamp: number;
@@ -38,9 +39,18 @@ interface BrowserMetrics {
 }
 
 interface SecurityAlert {
-    type: 'warning' | 'error';
+    type: 'default' | 'destructive';
     message: string;
     timestamp: number;
+}
+
+interface BrowserStats {
+    id: string;
+    url: string;
+    activeUsers: number;
+    averageLoadTime: string;
+    status: 'active' | 'inactive';
+    lastUpdated: string;
 }
 
 export function BrowserMonitoringSection() {
@@ -48,6 +58,7 @@ export function BrowserMonitoringSection() {
     const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
     const [activeUsers, setActiveUsers] = useState(0);
     const [totalTabs, setTotalTabs] = useState(0);
+    const [browsers, setBrowsers] = useState<BrowserStats[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -85,20 +96,34 @@ export function BrowserMonitoringSection() {
             }
         };
 
+        // ブラウザ情報の取得
+        const fetchBrowsers = async () => {
+            try {
+                const response = await fetch('/api/admin/browser/browsers');
+                const data = await response.json();
+                setBrowsers(data);
+            } catch (error) {
+                console.error('ブラウザ情報取得エラー:', error);
+            }
+        };
+
         // 初回実行
         fetchMetrics();
         fetchAlerts();
         fetchStats();
+        fetchBrowsers();
 
         // 定期的な更新
         const metricsInterval = setInterval(fetchMetrics, 60000); // 1分ごと
         const alertsInterval = setInterval(fetchAlerts, 30000); // 30秒ごと
         const statsInterval = setInterval(fetchStats, 60000); // 1分ごと
+        const browsersInterval = setInterval(fetchBrowsers, 60000); // 1分ごと
 
         return () => {
             clearInterval(metricsInterval);
             clearInterval(alertsInterval);
             clearInterval(statsInterval);
+            clearInterval(browsersInterval);
         };
     }, []);
 
@@ -199,6 +224,57 @@ export function BrowserMonitoringSection() {
                         <Button onClick={handleOptimize}>
                             パフォーマンスを最適化
                         </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>ブラウザ監視</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {browsers.map(browser => (
+                            <div
+                                key={browser.id}
+                                className="flex items-center justify-between p-4 rounded-lg bg-secondary/10"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <Globe className="h-4 w-4 text-blue-500" />
+                                    <div>
+                                        <p className="font-medium">{browser.url}</p>
+                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-1">
+                                                <Users className="h-3 w-3" />
+                                                <span>{browser.activeUsers} ユーザー</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-3 w-3" />
+                                                <span>読み込み時間: {browser.averageLoadTime}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <Badge
+                                        variant={browser.status === 'active' ? 'default' : 'secondary'}
+                                    >
+                                        {browser.status === 'active' ? 'アクティブ' : '非アクティブ'}
+                                    </Badge>
+                                    <span className="text-sm text-muted-foreground">
+                                        最終更新: {browser.lastUpdated}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {browsers.length === 0 && (
+                            <div className="text-center text-muted-foreground py-8">
+                                <Globe className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                                <p>監視対象のブラウザがありません</p>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>

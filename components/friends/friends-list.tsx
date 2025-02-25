@@ -62,7 +62,7 @@ export function FriendsList({ onBack }: FriendsListProps) {
               >
                 <div className="flex items-center gap-3">
                   <UserAvatar
-                    userId={friend.user.id}
+                    user={friend.user}
                     fallback={friend.user.name[0]}
                   />
                   <div>
@@ -94,7 +94,7 @@ export function FriendsList({ onBack }: FriendsListProps) {
               >
                 <div className="flex items-center gap-3">
                   <UserAvatar
-                    userId={request.user.id}
+                    user={request.user}
                     fallback={request.user.name[0]}
                   />
                   <div>

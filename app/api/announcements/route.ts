@@ -7,53 +7,28 @@ import { Prisma } from "@prisma/client"
 // お知らせ一覧の取得
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
-
-    // メールアドレスでユーザーを検索
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email
-      }
-    })
-
-    if (!user) {
-      return new NextResponse("User not found", { status: 404 })
-    }
-
-    // お知らせを取得（既読情報も含む）
     const announcements = await prisma.announcement.findMany({
-      orderBy: [
-        { priority: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: 10,
+      orderBy: {
+        createdAt: 'desc'
+      },
       include: {
-        reads: {
-          where: {
-            userId: user.id
-          }
-        }
+        readBy: true
       }
     })
 
-    // レスポンス用にデータを整形
     const formattedAnnouncements = announcements.map(announcement => ({
       id: announcement.id,
       title: announcement.title,
       content: announcement.content,
-      type: announcement.type,
       priority: announcement.priority,
-      isRead: announcement.reads.length > 0,
-      createdAt: announcement.createdAt.toISOString()
+      createdAt: announcement.createdAt,
+      updatedAt: announcement.updatedAt,
+      readCount: announcement.readBy.length
     }))
 
     return NextResponse.json(formattedAnnouncements)
   } catch (error) {
-    console.error("[ANNOUNCEMENTS]", error)
+    console.error("[ANNOUNCEMENTS_ERROR]", { error: error instanceof Error ? error.message : 'Unknown error' })
     return new NextResponse("Internal Error", { status: 500 })
   }
 }

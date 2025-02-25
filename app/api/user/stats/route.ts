@@ -1,79 +1,61 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
-import { authOptions } from "@/lib/auth"
+
+interface UserSessionStats {
+  id: string
+  startTime: Date
+  endTime: Date | null
+  duration: number | null
+}
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // メールアドレスとIDの両方でユーザーを検索
-    let user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: session.user.email },
-          { id: session.user.id }
-        ]
-      }
-    })
-
-    if (!user) {
-      // ユーザーが見つからない場合は新規作成
-      user = await prisma.user.create({
-        data: {
-          email: session.user.email,
-          name: session.user.name || session.user.email.split('@')[0]
-        }
-      })
-    }
-
-    // 本日の利用時間を計算
+    // 今日の日付の開始時刻と終了時刻を取得
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
-    const userSessions = await prisma.userSession.findMany({
-      where: {
-        userId: user.id,
-        startTime: {
-          gte: today
-        }
+    // 今日のユーザーセッションを取得
+    const todaysSessions = await prisma.$queryRaw<UserSessionStats[]>`
+      SELECT id, "startTime", "endTime", duration
+      FROM "UserSession"
+      WHERE "userId" = ${session.user.id}
+      AND "startTime" >= ${today}
+      AND "startTime" < ${tomorrow}
+    `
+
+    // 総利用時間を計算（分単位）
+    const totalMinutes = todaysSessions.reduce((total: number, userSession: UserSessionStats) => {
+      if (userSession.duration) {
+        return total + userSession.duration
       }
-    })
-
-    // 利用時間を分単位で計算
-    let totalMinutes = 0
-    for (const userSession of userSessions) {
+      // セッションが終了していない場合は現在時刻までの時間を計算
       const endTime = userSession.endTime || new Date()
-      const duration = endTime.getTime() - userSession.startTime.getTime()
-      totalMinutes += Math.floor(duration / (1000 * 60))
-    }
+      const durationInMinutes = Math.floor((endTime.getTime() - userSession.startTime.getTime()) / (1000 * 60))
+      return total + durationInMinutes
+    }, 0)
 
-    // 新しいセッションを作成または更新
-    const currentSession = await prisma.userSession.findFirst({
-      where: {
-        userId: user.id,
-        endTime: null
-      }
-    })
-
-    if (!currentSession) {
-      await prisma.userSession.create({
-        data: {
-          userId: user.id,
-          startTime: new Date(),
-        }
-      })
-    }
+    // 時間と分に変換
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
 
     return NextResponse.json({
-      usageTime: totalMinutes
+      usageTime: {
+        hours,
+        minutes
+      },
+      totalSessions: todaysSessions.length
     })
   } catch (error) {
-    console.error("[USER_STATS]", error)
+    console.error("[USER_STATS_ERROR]", error)
     return new NextResponse("Internal Error", { status: 500 })
   }
 } 

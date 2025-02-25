@@ -9,23 +9,21 @@ export default withAuth(
     const isAuth = !!token
     const isAuthPage = req.nextUrl.pathname === "/"
 
-    if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/", req.url))
-      }
-      return null
+    // 認証済みユーザーは常に/にリダイレクト
+    if (!isAuthPage && isAuth) {
+      return NextResponse.redirect(new URL("/", req.url))
     }
 
+    // 未認証ユーザーも/にリダイレクト
     if (!isAuth) {
       return NextResponse.redirect(new URL("/", req.url))
     }
+
+    return null
   },
   {
     callbacks: {
       async authorized() {
-        // This is a work-around for handling redirect on auth pages.
-        // We return true here so that the middleware function above
-        // is always called.
         return true
       },
     },

@@ -1,14 +1,17 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { LoginForm } from "./components/auth/LoginForm"
 import { UserDashboard } from "@/components/dashboard/user-dashboard"
+import { AdminDashboard } from "@/components/admin/admin-dashboard"
+import { useNavigationStore } from "@/lib/stores/navigation-store"
 
 export default function HomePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { activeView } = useNavigationStore()
 
   // セッションの状態を監視
   useEffect(() => {
@@ -45,17 +48,38 @@ export default function HomePage() {
     )
   }
 
-  // セッションが有効な場合はダッシュボードを表示
+  // アクティブビューに基づいてコンポーネントを表示
+  const renderView = () => {
+    switch (activeView) {
+      case 'admin':
+        if (session.user?.role === "super_admin" || session.user?.role === "admin") {
+          return <AdminDashboard stats={{
+            totalUsers: 0,
+            activeUsers: 0,
+            totalServers: 0,
+            totalMessages: 0,
+            monthlyActiveUsers: []
+          }} />
+        }
+        return <UserDashboard />
+      case 'browser':
+        return <div>ブラウザビュー</div>
+      case 'chat':
+        return <div>チャットビュー</div>
+      case 'friends':
+        return <div>フレンドビュー</div>
+      case 'notifications':
+        return <div>通知ビュー</div>
+      case 'settings':
+        return <div>設定ビュー</div>
+      default:
+        return <UserDashboard />
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <UserDashboard
-        onBrowserOpen={() => console.log("ブラウザを開く")}
-        onSettingsOpen={() => console.log("設定を開く")}
-        onChatOpen={() => console.log("チャットを開く")}
-        onFriendsOpen={() => console.log("フレンドリストを開く")}
-        onAdminOpen={() => console.log("管理画面を開く")}
-        isAdmin={session.user?.role === "admin"}
-      />
+      {renderView()}
     </div>
   )
 } 

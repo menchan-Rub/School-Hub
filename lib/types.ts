@@ -119,4 +119,10 @@ export interface Channel {
   serverId: string
   type: 'text' | 'voice'
   isPrivate: boolean
+}
+
+export interface AdminStats {
+  totalUsers: number
+  activeUsers: number
+  totalSessions: number
 } 

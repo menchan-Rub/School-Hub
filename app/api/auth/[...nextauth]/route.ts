@@ -19,7 +19,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("メールアドレスとパスワードを入力してください")
+          console.error("認証エラー: 認証情報が不足しています")
+          return null
         }
 
         try {
@@ -28,20 +29,29 @@ export const authOptions: NextAuthOptions = {
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              passwordHash: true
             }
           })
 
           console.log("ユーザー検索結果:", user ? "見つかりました" : "見つかりません")
 
-          if (!user) {
-            throw new Error("ユーザーが見つかりません")
+          if (!user || !user.passwordHash) {
+            console.error("認証エラー: ユーザーが見つからないか、パスワードが設定されていません")
+            return null
           }
 
           const isValid = await compare(credentials.password, user.passwordHash)
           console.log("パスワード検証:", isValid ? "成功" : "失敗")
 
           if (!isValid) {
-            throw new Error("パスワードが正しくありません")
+            console.error("認証エラー: パスワードが一致しません")
+            return null
           }
 
           return {
@@ -52,7 +62,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("認証エラー:", error)
-          throw error
+          return null
         }
       }
     })
@@ -78,7 +88,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 24 * 60 * 60, // 24時間
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: true // 開発環境でデバッグモードを有効化
 }
 
 const handler = NextAuth(authOptions)

@@ -13,6 +13,8 @@ import { StatsCard } from "@/components/admin/stats-card"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
+import { AdminNav } from "@/components/admin/nav"
+import { Sidebar } from "@/components/admin/sidebar"
 
 const LineChart = dynamic(() => import("@/components/admin/line-chart"), {
   ssr: false,
@@ -72,86 +74,28 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-6 space-y-8">
-      <AdminPageHeader
-        title="管理者ダッシュボード"
-        subtitle="システムの状態と統計情報"
-      >
-        <Badge variant="outline" className="gap-1">
-          <Shield className="h-3 w-3" />
-          システム状態: <span className="text-emerald-500">正常</span>
-        </Badge>
-      </AdminPageHeader>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard 
-          icon={Users}
-          title="総ユーザー数" 
-          value={stats?.totalUsers.toLocaleString() || "0"} 
-          description="登録ユーザー"
-          trend={{ value: 14, isPositive: true }}
-        />
-        <StatsCard 
-          icon={Activity}
-          title="アクティブユーザー" 
-          value={stats?.activeUsers.toLocaleString() || "0"} 
-          description="オンライン中"
-          trend={{ value: 21, isPositive: true }}
-        />
-        <StatsCard 
-          icon={Server}
-          title="総サーバー数" 
-          value={stats?.totalServers || "0"} 
-          description="登録サーバー"
-          trend={{ value: 5, isPositive: true }}
-        />
-        <StatsCard 
-          icon={MessageSquare}
-          title="総メッセージ数" 
-          value={stats?.totalMessages.toLocaleString() || "0"} 
-          description="コミュニケーション"
-          trend={{ value: 43, isPositive: true }}
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              ユーザー増加傾向
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LineChart data={stats?.monthlyActiveUsers ?? []} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              セキュリティ概要
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <StatsCard 
-                icon={AlertTriangle}
-                title="セキュリティアラート" 
-                value="0" 
-                description="アクティブな脅威なし"
-                trend={{ value: 0, isPositive: true }}
-              />
-              <StatsCard 
-                icon={Lock}
-                title="システムセキュリティ" 
-                value="保護済み" 
-                description="全システム安全"
-              />
+    <div className="flex h-screen">
+      <Sidebar />
+      <div className="flex-1">
+        <AdminNav />
+        <div className="p-8">
+          <h1 className="text-3xl font-bold mb-8">管理者ダッシュボード</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* 統計カード */}
+            <div className="bg-card p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2">総ユーザー数</h3>
+              <p className="text-3xl font-bold">{stats?.totalUsers.toLocaleString() || "0"}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="bg-card p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2">アクティブユーザー</h3>
+              <p className="text-3xl font-bold">{stats?.activeUsers.toLocaleString() || "0"}</p>
+            </div>
+            <div className="bg-card p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2">総セッション数</h3>
+              <p className="text-3xl font-bold">{stats?.totalSessions.toLocaleString() || "0"}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -1,3 +1,7 @@
 {
+  "/api/admin/browser/metrics/route": "app/api/admin/browser/metrics/route.js",
+  "/api/admin/browser/stats/route": "app/api/admin/browser/stats/route.js",
+  "/api/admin/browser/browsers/route": "app/api/admin/browser/browsers/route.js",
+  "/api/admin/browser/alerts/route": "app/api/admin/browser/alerts/route.js",
   "/page": "app/page.js"
 }

@@ -35,7 +35,7 @@ export default function SettingsPage() {
     timezone: "Asia/Tokyo"
   })
 
-  if (!session || !["super_admin", "admin"].includes(session.user?.role)) redirect("/login")
+  if (!session || !["super_admin", "admin"].includes(session.user?.role as string)) redirect("/login")
   if (status !== "authenticated") return <LoadingSpinner />
 
   const updateSetting = async (key: keyof SystemSettings, value: any) => {
@@ -61,38 +61,38 @@ export default function SettingsPage() {
   return (
     <div className="p-6 space-y-8">
       <AdminPageHeader
-        title="System Settings"
-        subtitle="Configure global system settings"
-        badge="Control Panel"
+        title="システム設定"
+        subtitle="システム全体の設定を管理"
+        badge="管理者専用"
       />
 
       <Tabs defaultValue="general">
         <TabsList>
           <TabsTrigger value="general">
             <Settings className="h-4 w-4 mr-2" />
-            General
+            一般設定
           </TabsTrigger>
           <TabsTrigger value="database">
             <Database className="h-4 w-4 mr-2" />
-            Database
+            データベース
           </TabsTrigger>
           <TabsTrigger value="localization">
             <Globe className="h-4 w-4 mr-2" />
-            Localization
+            ローカライゼーション
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
+              <CardTitle>一般設定</CardTitle>
             </CardHeader>
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Maintenance Mode</Label>
+                  <Label>メンテナンスモード</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable maintenance mode for the entire system
+                    システムをメンテナンスモードに切り替えます
                   </p>
                 </div>
                 <Switch
@@ -102,18 +102,18 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>System Language</Label>
+                <Label>システム言語</Label>
                 <Select
                   value={settings.language}
                   disabled={isLoading}
                   onValueChange={(value) => updateSetting("language", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
+                    <SelectValue placeholder="言語を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
                     <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

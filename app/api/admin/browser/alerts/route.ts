@@ -1,39 +1,24 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { PerformanceUtils } from '@/browser/utils/performance-utils';
 
 export async function GET() {
     try {
-        // セッションの確認
         const session = await getServerSession(authOptions);
-        if (!session?.user?.role === 'ADMIN') {
+        
+        if (!session?.user?.role || !['super_admin', 'admin'].includes(session.user.role)) {
+            console.error('Unauthorized access attempt:', session?.user?.email);
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        // 直近のアラートを取得
-        const alerts = await prisma.browserSecurityAlert.findMany({
-            where: {
-                createdAt: {
-                    gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // 24時間以内
-                }
-            },
-            orderBy: {
-                createdAt: 'desc'
-            },
-            take: 100
-        });
-
-        // アラートをフロントエンド用に整形
-        const formattedAlerts = alerts.map(alert => ({
-            type: alert.severity as 'warning' | 'error',
-            message: alert.message,
-            timestamp: alert.createdAt.getTime()
-        }));
-
-        return NextResponse.json(formattedAlerts);
+        const alerts = await PerformanceUtils.getSecurityAlerts();
+        return NextResponse.json(alerts);
     } catch (error) {
-        console.error('[BROWSER_ALERTS_ERROR]', error);
-        return new NextResponse('Internal Error', { status: 500 });
+        console.error('Failed to get security alerts:', error);
+        return new NextResponse(
+            JSON.stringify({ error: 'Internal Server Error' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
     }
 } 

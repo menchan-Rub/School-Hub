@@ -20,19 +20,21 @@ const DAILY_MESSAGES = [
 ]
 
 interface UserDashboardProps {
-  onChatOpen: () => void;
-  onFriendsOpen: () => void;
-  onSettingsOpen: () => void;
-  onAdminOpen: () => void;
-  isAdmin: boolean;
+  onBrowserOpen?: () => void;
+  onSettingsOpen?: () => void;
+  onChatOpen?: () => void;
+  onFriendsOpen?: () => void;
+  onAdminOpen?: () => void;
+  isAdmin?: boolean;
 }
 
 export function UserDashboard({
+  onBrowserOpen,
+  onSettingsOpen,
   onChatOpen,
   onFriendsOpen,
-  onSettingsOpen,
   onAdminOpen,
-  isAdmin
+  isAdmin = false
 }: UserDashboardProps) {
   const { data: session } = useSession()
   const [usageTime, setUsageTime] = useState(0)
