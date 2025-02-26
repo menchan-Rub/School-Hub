@@ -69,9 +69,24 @@ export default function HomePage() {
     setActiveView('admin-overview')
   }
 
-  const handleBrowserOpen = () => {
-    // ブラウザを開く処理
-    console.log('ブラウザを開く')
+  const handleBrowserOpen = async () => {
+    try {
+      const response = await fetch('/api/browser/launch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('ブラウザの起動に失敗しました');
+      }
+
+      const data = await response.json();
+      console.log('ブラウザが起動しました:', data);
+    } catch (error) {
+      console.error('ブラウザの起動中にエラーが発生しました:', error);
+    }
   }
 
   const handleSettingsOpen = () => {
