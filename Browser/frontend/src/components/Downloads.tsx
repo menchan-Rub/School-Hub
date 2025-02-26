@@ -14,7 +14,11 @@ interface Download {
   local_path: string | null;
 }
 
-export function Downloads() {
+interface DownloadsProps {
+  path: string;
+}
+
+export function Downloads(props: DownloadsProps) {
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

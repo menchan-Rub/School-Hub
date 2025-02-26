@@ -1,9 +1,10 @@
 import { h } from 'preact';
 import { Router } from 'preact-router';
 import { signal } from '@preact/signals';
+import { ComponentProps } from 'preact';
 
 import Tab from './Tab';
-import AddressBar from './AddressBar';
+import { AddressBar } from './AddressBar';
 import Bookmarks from './Bookmarks';
 import History from './History';
 import Settings from './Settings';
@@ -15,11 +16,15 @@ import '../styles/App.scss';
 export const activeTab = signal(0);
 export const tabs = signal([{ id: 0, url: '', title: '' }]);
 
+type RouteProps = {
+  path: string;
+};
+
 export function App() {
   return (
-    <div class="browser-app">
-      <header class="browser-header">
-        <div class="tab-bar">
+    <div className="browser-app">
+      <header className="browser-header">
+        <div className="tab-bar">
           {tabs.value.map((tab, index) => (
             <Tab
               key={tab.id}
@@ -29,14 +34,20 @@ export function App() {
               onClick={() => handleTabClick(index)}
             />
           ))}
-          <button class="new-tab-button" onClick={handleNewTab}>
+          <button className="new-tab-button" onClick={handleNewTab}>
             +
           </button>
         </div>
-        <AddressBar />
+        <AddressBar onNavigate={(url) => {
+          const ws = new WebSocket('ws://localhost:3000');
+          ws.onopen = () => {
+            ws.send(JSON.stringify({ type: 'NAVIGATE', url }));
+          };
+        }} />
       </header>
 
-      <main class="browser-content">
+      <main className="browser-content">
+        {/* @ts-ignore */}
         <Router>
           <Bookmarks path="/bookmarks" />
           <History path="/history" />

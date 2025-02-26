@@ -14,7 +14,11 @@ interface Settings {
   language: string;
 }
 
-export function Settings() {
+interface SettingsProps {
+  path: string;
+}
+
+export function Settings(props: SettingsProps) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

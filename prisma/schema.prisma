@@ -48,6 +48,9 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   readAnnouncements AnnouncementRead[]
+  ownedServers  Server[]
+  messages      Message[]
+  auditLogs     AuditLog[]
 }
 
 model VerificationToken {
@@ -90,4 +93,59 @@ model AnnouncementRead {
   user          User         @relation(fields: [userId], references: [id])
 
   @@unique([announcementId, userId])
-} 
+}
+
+model Server {
+  id            String    @id @default(cuid())
+  name          String
+  ownerId       String
+  status        String    @default("online")
+  memberCount   Int       @default(0)
+  messageCount  Int       @default(0)
+  boostLevel    Int       @default(0)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  messages      Message[]
+  owner         User      @relation(fields: [ownerId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  serverId  String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  server    Server   @relation(fields: [serverId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String
+  adminId   String
+  createdAt DateTime @default(now())
+  admin     User     @relation(fields: [adminId], references: [id])
+}
+
+model SecurityAlert {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SystemSettings {
+  id            Int      @id @default(1)
+  maintenance   Boolean  @default(false)
+  language      String   @default("ja")
+  autoBackup    Boolean  @default(true)
+  queryLogging  Boolean  @default(true)
+  defaultLocale String   @default("ja-JP")
+  timezone      String   @default("Asia/Tokyo")
+  updatedAt     DateTime @updatedAt
+}

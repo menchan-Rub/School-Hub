@@ -1,6 +1,5 @@
 import { Metadata } from "next"
 import { Sidebar } from "@/components/admin/sidebar"
-import { ThemeProvider } from "@/components/theme-provider"
 import { AdminNav } from "@/components/admin/nav"
 
 export const metadata: Metadata = {
@@ -14,16 +13,14 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <ThemeProvider>
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-muted/10">
-          <div className="container mx-auto py-4">
-            <AdminNav />
-            {children}
-          </div>
-        </main>
+    <div className="flex h-full">
+      <Sidebar />
+      <div className="flex-1">
+        <AdminNav />
+        <div className="container mx-auto py-4">
+          {children}
+        </div>
       </div>
-    </ThemeProvider>
+    </div>
   )
 } 

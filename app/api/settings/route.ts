@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm"
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions)
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return new NextResponse("認証が必要です", { status: 401 })
   }
 
@@ -34,4 +34,4 @@ export async function PATCH(req: Request) {
   } catch (error) {
     return new NextResponse("設定の更新に失敗しました", { status: 500 })
   }
-} 
+}

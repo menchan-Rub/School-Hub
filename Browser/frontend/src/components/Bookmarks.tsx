@@ -2,6 +2,10 @@ import { h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import '../styles/Bookmarks.scss';
 
+interface BookmarksProps {
+  path: string;
+}
+
 interface Bookmark {
   id: number;
   url: string;
@@ -16,7 +20,7 @@ interface Folder {
   parent_id: number | null;
 }
 
-export function Bookmarks() {
+export function Bookmarks(props: BookmarksProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [currentFolder, setCurrentFolder] = useState<number | null>(null);

@@ -14,9 +14,11 @@ import { columns } from "./columns"
 import { StatsCard } from "@/components/admin/stats-card"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { CreateUserModal } from "@/components/admin/create-user-modal"
+import { Sidebar } from "@/components/admin/sidebar"
+import { AdminNav } from "@/components/admin/nav"
 
 export default function UsersPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const { data: users = [], isLoading } = useQuery<User[]>({
@@ -26,19 +28,19 @@ export default function UsersPage() {
       if (!res.ok) throw new Error('Failed to fetch users')
       return res.json()
     },
-    enabled: !!session && ["super_admin", "admin"].includes(session.user.role)
+    enabled: !!session && ["super_admin", "admin"].includes(session.user?.role as string)
   })
+
+  if (status === "loading" || isLoading) {
+    return <LoadingSpinner />
+  }
 
   if (!session) {
     redirect("/login")
   }
 
-  if (!["super_admin", "admin"].includes(session.user.role)) {
+  if (!["super_admin", "admin"].includes(session.user?.role as string)) {
     redirect("/dashboard")
-  }
-
-  if (isLoading) {
-    return <LoadingSpinner />
   }
 
   const stats = {
@@ -48,51 +50,57 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-6 space-y-8">
-      <AdminPageHeader
-        title="ユーザー管理"
-        subtitle="ユーザーの追加・編集・削除"
-        badge="管理者専用"
-      >
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          ユーザーを追加
-        </Button>
-      </AdminPageHeader>
+    <div className="flex h-full overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 overflow-y-auto">
+        <AdminNav />
+        <div className="p-8">
+          <AdminPageHeader
+            title="ユーザー管理"
+            subtitle="ユーザーの追加・編集・削除"
+            badge="管理者専用"
+          >
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              ユーザーを追加
+            </Button>
+          </AdminPageHeader>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatsCard 
-          icon={UserCircle} 
-          label="総ユーザー数" 
-          value={stats.totalUsers.toLocaleString()} 
-          description="登録アカウント"
-          trend={{ value: 8, isPositive: true }}
-        />
-        <StatsCard 
-          icon={Activity} 
-          label="アクティブユーザー" 
-          value={stats.activeUsers}
-          description="現在アクティブ"
-          trend={{ value: stats.activeUsers / stats.totalUsers * 100, isPositive: true }}
-        />
-        <StatsCard 
-          icon={ShieldCheck} 
-          label="管理者数" 
-          value={stats.adminCount}
-          description="管理権限保持者"
-        />
+          <div className="grid gap-6 md:grid-cols-3 mt-8">
+            <StatsCard 
+              icon={UserCircle} 
+              label="総ユーザー数" 
+              value={stats.totalUsers.toLocaleString()} 
+              description="登録アカウント"
+              trend={{ value: 8, isPositive: true }}
+            />
+            <StatsCard 
+              icon={Activity} 
+              label="アクティブユーザー" 
+              value={stats.activeUsers}
+              description="現在アクティブ"
+              trend={{ value: stats.activeUsers / stats.totalUsers * 100, isPositive: true }}
+            />
+            <StatsCard 
+              icon={ShieldCheck} 
+              label="管理者数" 
+              value={stats.adminCount}
+              description="管理権限保持者"
+            />
+          </div>
+
+          <Card className="mt-8">
+            <CardHeader>
+              <DataTable columns={columns} data={users} filterColumn="name" />
+            </CardHeader>
+          </Card>
+
+          <CreateUserModal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+          />
+        </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <DataTable columns={columns} data={users} filterColumn="name" />
-        </CardHeader>
-      </Card>
-
-      <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
     </div>
   )
 } 

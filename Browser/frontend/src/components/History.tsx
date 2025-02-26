@@ -10,7 +10,11 @@ interface HistoryEntry {
   favicon_url: string | null;
 }
 
-export function History() {
+interface HistoryProps {
+  path: string;
+}
+
+export function History(props: HistoryProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -124,5 +124,7 @@ export interface Channel {
 export interface AdminStats {
   totalUsers: number
   activeUsers: number
-  totalSessions: number
+  totalServers: number
+  totalMessages: number
+  monthlyActiveUsers: Array<{ date: string; count: number }>
 } 
