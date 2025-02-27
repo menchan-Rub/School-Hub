@@ -1,34 +1,27 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import { withAuth } from 'next-auth/middleware'
 
-export default withAuth(
-  async function middleware(req) {
-    const token = await getToken({ req })
-    const isAuth = !!token
-    const isAuthPage = req.nextUrl.pathname === "/"
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req })
+  const isAuth = !!token
+  const isAuthPage = req.nextUrl.pathname === "/"
 
-    // 認証済みユーザーは常に/にリダイレクト
-    if (!isAuthPage && isAuth) {
-      return NextResponse.redirect(new URL("/", req.url))
+  // 認証ページでの処理
+  if (isAuthPage) {
+    if (isAuth) {
+      return NextResponse.redirect(new URL("/dashboard", req.url))
     }
-
-    // 未認証ユーザーも/にリダイレクト
-    if (!isAuth) {
-      return NextResponse.redirect(new URL("/", req.url))
-    }
-
     return null
-  },
-  {
-    callbacks: {
-      async authorized() {
-        return true
-      },
-    },
   }
-)
+
+  // 認証が必要なページでの処理
+  if (!isAuth) {
+    return NextResponse.redirect(new URL("/", req.url))
+  }
+
+  return null
+}
 
 // ミドルウェアを適用するパスを設定
 export const config = {

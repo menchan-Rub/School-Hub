@@ -6,6 +6,6 @@ interface NavigationStore {
 }
 
 export const useNavigationStore = create<NavigationStore>((set) => ({
-  activeView: 'user-dashboard',
+  activeView: 'dashboard',
   setActiveView: (view) => set({ activeView: view }),
 })) 
