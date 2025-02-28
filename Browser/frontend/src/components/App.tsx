@@ -1,10 +1,12 @@
 import { h } from 'preact';
 import { Router } from 'preact-router';
 import { signal } from '@preact/signals';
+import { useNavigationStore } from '../lib/stores/navigation-store';
 import { ComponentProps } from 'preact';
 
 import Tab from './Tab';
 import { AddressBar } from './AddressBar';
+import { Browser } from './Browser';
 import Bookmarks from './Bookmarks';
 import History from './History';
 import Settings from './Settings';
@@ -21,6 +23,14 @@ type RouteProps = {
 };
 
 export function App() {
+  const { activeView } = useNavigationStore();
+
+  // ブラウザビューの表示
+  if (activeView === 'browser') {
+    return <Browser />;
+  }
+
+  // その他のビューの表示
   return (
     <div className="browser-app">
       <header className="browser-header">
@@ -39,7 +49,7 @@ export function App() {
           </button>
         </div>
         <AddressBar onNavigate={(url) => {
-          const ws = new WebSocket('ws://localhost:3000');
+          const ws = new WebSocket('ws://localhost:10284');
           ws.onopen = () => {
             ws.send(JSON.stringify({ type: 'NAVIGATE', url }));
           };

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { LoginForm } from "./components/auth/LoginForm"
 import { UserDashboard } from "@/components/dashboard/user-dashboard"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
@@ -17,8 +16,7 @@ import { AdminStats } from "@/lib/types"
 
 export default function HomePage() {
   const { data: session, status } = useSession()
-  const { activeView, setActiveView } = useNavigationStore()
-  const router = useRouter()
+  const { activeView } = useNavigationStore()
 
   // 管理者統計データの取得
   const { data: adminStats } = useQuery<AdminStats>({
@@ -44,11 +42,6 @@ export default function HomePage() {
     console.log("認証済み:", session.user)
   }, [session, status])
 
-  // ビューの変更を監視
-  useEffect(() => {
-    console.log("現在のビュー:", activeView)
-  }, [activeView])
-
   // ローディング中
   if (status === "loading") {
     return (
@@ -70,46 +63,6 @@ export default function HomePage() {
     )
   }
 
-  const handleAdminOpen = () => {
-    console.log("管理者ダッシュボードを開きます")
-    setActiveView('admin-overview')
-  }
-
-  const handleBrowserOpen = async () => {
-    try {
-      const response = await fetch('/api/browser/launch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('ブラウザの起動に失敗しました')
-      }
-
-      const data = await response.json()
-      console.log('ブラウザが起動しました:', data)
-    } catch (error) {
-      console.error('ブラウザの起動中にエラーが発生しました:', error)
-    }
-  }
-
-  const handleSettingsOpen = () => {
-    console.log('設定を開く')
-    setActiveView('settings')
-  }
-
-  const handleChatOpen = () => {
-    console.log('チャットを開く')
-    setActiveView('chat')
-  }
-
-  const handleFriendsOpen = () => {
-    console.log('フレンドリストを開く')
-    setActiveView('friends')
-  }
-
   // メインコンテンツの表示
   const renderContent = () => {
     console.log('レンダリング中のビュー:', activeView)
@@ -124,7 +77,6 @@ export default function HomePage() {
               totalMessages: 0,
               monthlyActiveUsers: []
             }}
-            onHomeClick={() => setActiveView('dashboard')}
           />
         )
       case 'admin-users':
@@ -143,17 +95,6 @@ export default function HomePage() {
         return <div>BAN管理</div>
       case 'admin-settings':
         return <SettingsSection />
-      case 'dashboard':
-        return (
-          <UserDashboard 
-            isAdmin={["super_admin", "admin"].includes(session.user?.role as string)}
-            onAdminOpen={handleAdminOpen}
-            onBrowserOpen={handleBrowserOpen}
-            onSettingsOpen={handleSettingsOpen}
-            onChatOpen={handleChatOpen}
-            onFriendsOpen={handleFriendsOpen}
-          />
-        )
       case 'friends':
         return <div>フレンド機能は開発中です</div>
       case 'chat':
@@ -164,17 +105,9 @@ export default function HomePage() {
         return <div>ブラウザ機能は開発中です</div>
       case 'bookmarks':
         return <div>ブックマーク機能は開発中です</div>
+      case 'dashboard':
       default:
-        return (
-          <UserDashboard 
-            isAdmin={["super_admin", "admin"].includes(session.user?.role as string)}
-            onAdminOpen={handleAdminOpen}
-            onBrowserOpen={handleBrowserOpen}
-            onSettingsOpen={handleSettingsOpen}
-            onChatOpen={handleChatOpen}
-            onFriendsOpen={handleFriendsOpen}
-          />
-        )
+        return <UserDashboard isAdmin={["super_admin", "admin"].includes(session.user?.role as string)} />
     }
   }
 

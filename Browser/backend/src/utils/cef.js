@@ -2,6 +2,7 @@ const logger = require('./logger');
 const { spawn } = require('child_process');
 const path = require('path');
 const EventEmitter = require('events');
+const fs = require('fs');
 
 // CEFプロセスの状態管理
 let cefProcess = null;
@@ -16,34 +17,84 @@ class CefBrowser extends EventEmitter {
   }
 
   async start() {
-    const browserPath = path.resolve(__dirname, '../../../cef/build/lightweight_browser');
-    
-    this.process = spawn(browserPath, [], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
+    if (this.process) {
+      logger.warn('Browser is already running');
+      return;
+    }
 
-    this.process.stdout.on('data', (data) => {
-      console.log('Browser stdout:', data.toString());
-    });
+    try {
+      const cefDir = path.resolve(__dirname, '../../../cef');
+      const buildDir = path.join(cefDir, 'build');
+      const browserPath = path.join(buildDir, 'lightweight_browser');
+      
+      // バイナリの存在確認
+      if (!fs.existsSync(browserPath)) {
+        throw new Error(`Browser binary not found at: ${browserPath}`);
+      }
 
-    this.process.stderr.on('data', (data) => {
-      console.error('Browser stderr:', data.toString());
-    });
+      // 実行権限の確認
+      try {
+        fs.accessSync(browserPath, fs.constants.X_OK);
+      } catch (error) {
+        throw new Error(`Browser binary is not executable: ${browserPath}`);
+      }
 
-    this.process.on('close', (code) => {
-      console.log('Browser process exited with code:', code);
-      this.emit('exit', code);
-    });
-
-    return new Promise((resolve) => {
-      this.process.stdout.once('data', () => {
-        resolve();
+      logger.info('Starting browser process:', {
+        browserPath,
+        cwd: buildDir
       });
-    });
+      
+      this.process = spawn(browserPath, [], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        cwd: buildDir // 重要: 実行ディレクトリをbuildに設定
+      });
+
+      this.process.stdout.on('data', (data) => {
+        logger.info('Browser stdout:', data.toString());
+      });
+
+      this.process.stderr.on('data', (data) => {
+        logger.error('Browser stderr:', data.toString());
+      });
+
+      this.process.on('close', (code) => {
+        logger.info('Browser process exited with code:', code);
+        this.process = null;
+        this.emit('exit', code);
+      });
+
+      this.process.on('error', (error) => {
+        logger.error('Browser process error:', error);
+        this.process = null;
+        this.emit('error', error);
+      });
+
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Browser startup timeout'));
+        }, 10000);
+
+        this.process.stdout.once('data', () => {
+          clearTimeout(timeout);
+          resolve();
+        });
+
+        this.process.stderr.once('data', (data) => {
+          clearTimeout(timeout);
+          if (data.toString().includes('ERROR')) {
+            reject(new Error(data.toString()));
+          }
+        });
+      });
+    } catch (error) {
+      logger.error('Failed to start browser:', error);
+      throw error;
+    }
   }
 
   async stop() {
     if (this.process) {
+      logger.info('Stopping browser process');
       this.process.kill();
       this.process = null;
     }
@@ -54,6 +105,7 @@ class CefBrowser extends EventEmitter {
       throw new Error('Browser not started');
     }
 
+    logger.info('Navigating to:', url);
     this.process.stdin.write(JSON.stringify({
       type: 'NAVIGATE',
       url
@@ -72,6 +124,7 @@ class CefBrowser extends EventEmitter {
       title: '新しいタブ'
     });
 
+    logger.info('Creating new tab:', { tabId, url });
     this.process.stdin.write(JSON.stringify({
       type: 'NEW_TAB',
       tabId,
@@ -90,6 +143,7 @@ class CefBrowser extends EventEmitter {
       throw new Error('Tab not found');
     }
 
+    logger.info('Closing tab:', tabId);
     this.tabs.delete(tabId);
     this.process.stdin.write(JSON.stringify({
       type: 'CLOSE_TAB',
@@ -117,13 +171,15 @@ class CefBrowser extends EventEmitter {
 const browser = new CefBrowser();
 
 // CEFの初期化
-const initialize = (options = {}) => {
+const initialize = async (options = {}) => {
   if (isInitialized) {
     logger.warn('CEF is already initialized');
     return;
   }
 
   try {
+    logger.info('Initializing CEF with options:', options);
+
     // CEFの設定
     const settings = {
       windowless_rendering_enabled: true,
@@ -133,9 +189,11 @@ const initialize = (options = {}) => {
       ...options
     };
 
-    // TODO: CEFの実際の初期化処理を実装
+    // ブラウザプロセスの起動
+    await browser.start();
+    
     isInitialized = true;
-    logger.info('CEF initialized successfully', settings);
+    logger.info('CEF initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize CEF:', error);
     throw error;
@@ -145,32 +203,13 @@ const initialize = (options = {}) => {
 // ブラウザウィンドウの作成
 const createBrowser = async (url, options = {}) => {
   if (!isInitialized) {
-    throw new Error('CEF is not initialized');
+    await initialize();
   }
 
   try {
-    // ブラウザ設定
-    const browserSettings = {
-      width: options.width || 1280,
-      height: options.height || 720,
-      webSecurity: true,
-      javascript: true,
-      applicationCache: true,
-      webgl: true,
-      ...options
-    };
-
-    // TODO: 実際のブラウザウィンドウ作成処理を実装
-    logger.info('Browser window created', {
-      url,
-      settings: browserSettings
-    });
-
-    return {
-      id: Date.now(),
-      url,
-      settings: browserSettings
-    };
+    const tabId = await browser.handleNewTab(url);
+    logger.info('Browser window created:', { tabId, url });
+    return { tabId, url };
   } catch (error) {
     logger.error('Failed to create browser window:', error);
     throw error;
@@ -211,10 +250,10 @@ const setEventHandler = (browserId, event, handler) => {
 };
 
 // ブラウザウィンドウの終了
-const closeBrowser = async (browserId) => {
+const closeBrowser = async (tabId) => {
   try {
-    // TODO: 実際のブラウザウィンドウ終了処理を実装
-    logger.info('Browser window closed', { browserId });
+    await browser.handleCloseTab(tabId);
+    logger.info('Browser window closed:', { tabId });
   } catch (error) {
     logger.error('Failed to close browser window:', error);
     throw error;
@@ -222,11 +261,10 @@ const closeBrowser = async (browserId) => {
 };
 
 // CEFのクリーンアップ
-const cleanup = () => {
+const cleanup = async () => {
   try {
-    if (cefProcess) {
-      // TODO: 実際のCEFクリーンアップ処理を実装
-      cefProcess = null;
+    if (isInitialized) {
+      await browser.stop();
       isInitialized = false;
       logger.info('CEF cleanup completed');
     }
@@ -240,9 +278,10 @@ const cleanup = () => {
 const getDebugInfo = () => {
   return {
     isInitialized,
-    processId: cefProcess?.pid,
+    processId: browser.process?.pid,
     memoryUsage: process.memoryUsage(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    tabs: Array.from(browser.tabs.entries())
   };
 };
 

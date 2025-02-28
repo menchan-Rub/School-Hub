@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const WebSocket = require('ws');
 const WebSocketServer = require('./websocket');
 const { browser } = require('./utils/cef');
 const api = require('./api');
@@ -101,8 +102,8 @@ async function start() {
     await browser.start();
     logger.info('CEF browser started successfully');
 
-    // データベースの初期化
-    await db.initialize();
+    // データベースの初期化は一時的にスキップ
+    // await db.initialize();
 
     // HTTPサーバーの起動
     server.listen(config.port, () => {
@@ -113,8 +114,8 @@ async function start() {
     process.on('SIGINT', async () => {
       logger.info('Shutting down...');
       await browser.stop();
-      await db.pool.end();
-      logger.info('Database connections closed');
+      // await db.pool.end();
+      // logger.info('Database connections closed');
       server.close(() => {
         logger.info('Server closed');
         process.exit(0);

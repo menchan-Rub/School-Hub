@@ -6,34 +6,34 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Home, Settings, Users, Globe, MessageSquare, Bell, Bookmark, Shield } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useNavigationStore } from "@/lib/stores/navigation-store"
+import { useNavigationStore, NavigationView } from "@/lib/stores/navigation-store"
 
 export function NavigationSidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const { setActiveView } = useNavigationStore()
+  const { activeView, setActiveView } = useNavigationStore()
 
   // 基本ルート（全ユーザーに表示）
   const baseRoutes = [
     {
       label: "ホーム",
       icon: Home,
-      view: "dashboard",
+      view: "dashboard" as NavigationView,
     },
     {
       label: "フレンド",
       icon: Users,
-      view: "friends",
+      view: "friends" as NavigationView,
     },
     {
       label: "メッセージ",
       icon: MessageSquare,
-      view: "chat",
+      view: "chat" as NavigationView,
     },
     {
       label: "通知",
       icon: Bell,
-      view: "notifications",
+      view: "notifications" as NavigationView,
     },
   ]
 
@@ -42,12 +42,12 @@ export function NavigationSidebar() {
     {
       label: "ブラウザ",
       icon: Globe,
-      view: "browser",
+      view: "browser" as NavigationView,
     },
     {
       label: "ブックマーク",
       icon: Bookmark,
-      view: "bookmarks",
+      view: "bookmarks" as NavigationView,
     },
   ]
 
@@ -56,14 +56,14 @@ export function NavigationSidebar() {
     {
       label: "管理者",
       icon: Shield,
-      view: "admin",
+      view: "admin-overview" as NavigationView,
     }
   ] : []
 
   // すべてのルートを結合
   const routes = [...baseRoutes, ...browserRoutes, ...adminRoutes]
 
-  const handleNavigation = (view: string) => {
+  const handleNavigation = (view: NavigationView) => {
     console.log("Switching to view:", view)
     setActiveView(view)
   }
@@ -79,12 +79,12 @@ export function NavigationSidebar() {
                   <Button
                     onClick={() => handleNavigation(route.view)}
                     size="icon"
-                    variant={pathname === route.view ? "default" : "ghost"}
+                    variant={activeView === route.view ? "default" : "ghost"}
                     className="h-[48px] w-[48px]"
                   >
                     <route.icon className={cn(
                       "h-5 w-5",
-                      pathname === route.view ? "text-white" : "text-zinc-500"
+                      activeView === route.view ? "text-white" : "text-zinc-500"
                     )} />
                   </Button>
                 </TooltipTrigger>

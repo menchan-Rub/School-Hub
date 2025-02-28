@@ -8,6 +8,7 @@ interface HistoryItem {
   visitCount: number;
   lastVisitTime: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface HistoryGroup {
@@ -59,26 +60,27 @@ export function useHistory() {
   }, [fetchHistory]);
 
   // 履歴の追加
-  const addHistory = useCallback(async (url: string, title: string) => {
+  const addHistoryItem = useCallback(async (url: string, title: string) => {
     try {
-      const item = await post('/history', { url, title });
+      const response = await post('/history', { url, title });
+      const item = response as unknown as HistoryItem;
       setGroups((prev) => {
         const date = new Date(item.lastVisitTime).toLocaleDateString();
         const existingGroup = prev.find((g) => g.date === date);
 
         if (existingGroup) {
-          const updatedGroup = {
-            ...existingGroup,
-            items: [item, ...existingGroup.items],
-          };
-          return prev.map((g) => (g.date === date ? updatedGroup : g));
-        } else {
-          return [{ date, items: [item] }, ...prev];
+          return prev.map((group) =>
+            group.date === date
+              ? { ...group, items: [item, ...group.items] }
+              : group
+          );
         }
+
+        return [{ date, items: [item] }, ...prev];
       });
       return item;
     } catch (error) {
-      console.error('Failed to add history:', error);
+      console.error('Failed to add history item:', error);
       throw error;
     }
   }, [post]);
@@ -133,7 +135,7 @@ export function useHistory() {
     loading,
     error,
     fetchHistory,
-    addHistory,
+    addHistoryItem,
     deleteHistory,
     searchHistory,
     clearHistory,

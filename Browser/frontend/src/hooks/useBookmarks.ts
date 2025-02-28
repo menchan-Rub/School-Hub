@@ -4,7 +4,7 @@ import { useApi } from './useApi';
 interface Folder {
   id: number;
   name: string;
-  parentId: number | null;
+  parentId?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,7 +23,7 @@ interface BookmarkTree {
   folders: Record<number, Folder>;
   bookmarks: Record<number, Bookmark>;
   rootFolders: number[];
-  folderChildren: Record<number, { folders: number[]; bookmarks: number[] }>;
+  folderChildren: Record<number, { folders: number[]; bookmarks: number[]; }>;
 }
 
 export function useBookmarks() {
@@ -91,9 +91,10 @@ export function useBookmarks() {
   }, [fetchBookmarks]);
 
   // フォルダーの作成
-  const createFolder = useCallback(async (name: string, parentId?: number) => {
+  const addFolder = useCallback(async (name: string, parentId?: number) => {
     try {
-      const folder = await post('/folders', { name, parentId });
+      const response = await post('/folders', { name, parentId });
+      const folder = response as unknown as Folder;
       setTree((prev) => {
         const newTree = { ...prev };
         newTree.folders[folder.id] = folder;
@@ -115,7 +116,8 @@ export function useBookmarks() {
   // フォルダーの更新
   const updateFolder = useCallback(async (id: number, name: string) => {
     try {
-      const folder = await put(`/folders/${id}`, { name });
+      const response = await put(`/folders/${id}`, { name });
+      const folder = response as unknown as Folder;
       setTree((prev) => ({
         ...prev,
         folders: { ...prev.folders, [id]: folder },
@@ -148,9 +150,10 @@ export function useBookmarks() {
   }, [del]);
 
   // ブックマークの作成
-  const createBookmark = useCallback(async (data: Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addBookmark = useCallback(async (url: string, title: string, description?: string, folderId?: number) => {
     try {
-      const bookmark = await post('/bookmarks', data);
+      const response = await post('/bookmarks', { url, title, description, folderId });
+      const bookmark = response as unknown as Bookmark;
       setTree((prev) => {
         const newTree = { ...prev };
         newTree.bookmarks[bookmark.id] = bookmark;
@@ -169,7 +172,8 @@ export function useBookmarks() {
   // ブックマークの更新
   const updateBookmark = useCallback(async (id: number, data: Partial<Bookmark>) => {
     try {
-      const bookmark = await put(`/bookmarks/${id}`, data);
+      const response = await put(`/bookmarks/${id}`, data);
+      const bookmark = response as unknown as Bookmark;
       setTree((prev) => {
         const newTree = { ...prev };
         const oldFolderId = prev.bookmarks[id]?.folderId;
@@ -219,10 +223,10 @@ export function useBookmarks() {
     loading,
     error,
     fetchBookmarks,
-    createFolder,
+    addFolder,
     updateFolder,
     deleteFolder,
-    createBookmark,
+    addBookmark,
     updateBookmark,
     deleteBookmark,
   };

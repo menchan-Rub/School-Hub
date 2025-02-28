@@ -82,9 +82,10 @@ export function useDownloads() {
   // ダウンロードの開始
   const startDownload = useCallback(async (url: string, filename: string) => {
     try {
-      const download = await post('/downloads', { url, filename });
+      const response = await post('/downloads', { url, filename });
+      const download = response as unknown as Download;
       wsStartDownload(url, filename);
-      setDownloads(prev => [download, ...prev]);
+      setDownloads(prev => [...prev, download]);
       return download;
     } catch (error) {
       console.error('Failed to start download:', error);
@@ -124,7 +125,8 @@ export function useDownloads() {
   // ダウンロードの再試行
   const retryDownload = useCallback(async (id: number) => {
     try {
-      const download = await post(`/downloads/${id}/retry`);
+      const response = await post(`/downloads/${id}/retry`, {});
+      const download = response as unknown as Download;
       wsRetryDownload(id.toString());
       setDownloads(prev =>
         prev.map(d => (d.id === id ? download : d))
@@ -139,7 +141,7 @@ export function useDownloads() {
   // ダウンロードの一時停止
   const pauseDownload = useCallback(async (id: number) => {
     try {
-      await post(`/downloads/${id}/pause`);
+      await post(`/downloads/${id}/pause`, {});
       wsPauseDownload(id.toString());
       setDownloads(prev =>
         prev.map(download =>
@@ -157,7 +159,7 @@ export function useDownloads() {
   // ダウンロードの再開
   const resumeDownload = useCallback(async (id: number) => {
     try {
-      await post(`/downloads/${id}/resume`);
+      await post(`/downloads/${id}/resume`, {});
       wsResumeDownload(id.toString());
       setDownloads(prev =>
         prev.map(download =>
@@ -175,7 +177,7 @@ export function useDownloads() {
   // ダウンロードファイルを開く
   const openDownload = useCallback(async (id: number) => {
     try {
-      await post(`/downloads/${id}/open`);
+      await post(`/downloads/${id}/open`, {});
     } catch (error) {
       console.error('Failed to open download:', error);
       throw error;
@@ -185,7 +187,7 @@ export function useDownloads() {
   // ダウンロードフォルダを開く
   const openDownloadFolder = useCallback(async (id: number) => {
     try {
-      await post(`/downloads/${id}/open-folder`);
+      await post(`/downloads/${id}/open-folder`, {});
     } catch (error) {
       console.error('Failed to open download folder:', error);
       throw error;

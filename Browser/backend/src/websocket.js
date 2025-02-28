@@ -1,94 +1,78 @@
 const WebSocket = require('ws');
-const { handleNavigate, handleNewTab, handleCloseTab } = require('./utils/cef');
+const logger = require('./utils/logger');
+const { browser } = require('./utils/cef');
 
-class WebSocketServer {
+class WebSocketServer extends WebSocket.Server {
   constructor(server) {
-    this.wss = new WebSocket.Server({ server });
-    this.clients = new Set();
-    this.setupWebSocket();
+    super({ server });
+    this.setupEventHandlers();
   }
 
-  setupWebSocket() {
-    this.wss.on('connection', (ws) => {
-      this.clients.add(ws);
+  setupEventHandlers() {
+    this.on('connection', (ws) => {
+      logger.info('New WebSocket connection established');
+
+      // 接続確認メッセージを送信
+      ws.send(JSON.stringify({ type: 'CONNECTED' }));
 
       ws.on('message', async (message) => {
         try {
           const data = JSON.parse(message);
-          await this.handleMessage(ws, data);
+          logger.info('Received message:', data);
+
+          switch (data.type) {
+            case 'NEW_TAB':
+              try {
+                const tab = await browser.handleNewTab(data.url);
+                ws.send(JSON.stringify({
+                  type: 'TAB_CREATED',
+                  tabId: tab.id,
+                  url: tab.url
+                }));
+              } catch (error) {
+                logger.error('Failed to create new tab:', error);
+                ws.send(JSON.stringify({
+                  type: 'ERROR',
+                  message: 'Failed to create new tab'
+                }));
+              }
+              break;
+
+            case 'NAVIGATE':
+              try {
+                await browser.handleNavigate(data.url);
+                ws.send(JSON.stringify({
+                  type: 'NAVIGATED',
+                  url: data.url
+                }));
+              } catch (error) {
+                logger.error('Failed to navigate:', error);
+                ws.send(JSON.stringify({
+                  type: 'ERROR',
+                  message: 'Failed to navigate'
+                }));
+              }
+              break;
+
+            default:
+              logger.warn('Unknown message type:', data.type);
+          }
         } catch (error) {
-          console.error('WebSocket message handling error:', error);
+          logger.error('Failed to process message:', error);
           ws.send(JSON.stringify({
             type: 'ERROR',
-            error: error.message
+            message: 'Internal server error'
           }));
         }
       });
 
-      ws.on('close', () => {
-        this.clients.delete(ws);
-      });
-
       ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        this.clients.delete(ws);
+        logger.error('WebSocket error:', error);
       });
-    });
-  }
 
-  async handleMessage(ws, data) {
-    switch (data.type) {
-      case 'NAVIGATE':
-        await handleNavigate(data.url);
-        this.broadcast({
-          type: 'URL_CHANGED',
-          url: data.url
-        });
-        break;
-
-      case 'NEW_TAB':
-        const tabId = await handleNewTab(data.url);
-        ws.send(JSON.stringify({
-          type: 'TAB_CREATED',
-          tabId
-        }));
-        break;
-
-      case 'CLOSE_TAB':
-        await handleCloseTab(data.tabId);
-        this.broadcast({
-          type: 'TAB_CLOSED',
-          tabId: data.tabId
-        });
-        break;
-
-      case 'UPDATE_TITLE':
-        this.broadcast({
-          type: 'TITLE_CHANGED',
-          tabId: data.tabId,
-          title: data.title
-        });
-        break;
-
-      case 'UPDATE_FAVICON':
-        this.broadcast({
-          type: 'FAVICON_CHANGED',
-          tabId: data.tabId,
-          favicon: data.favicon
-        });
-        break;
-
-      default:
-        console.warn('Unknown message type:', data.type);
-    }
-  }
-
-  broadcast(message) {
-    const messageStr = JSON.stringify(message);
-    this.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(messageStr);
-      }
+      ws.on('close', () => {
+        logger.info('WebSocket connection closed');
+      });
     });
   }
 }

@@ -9,6 +9,11 @@ interface Setting {
   updatedAt: string;
 }
 
+interface SettingsItem {
+  key: string;
+  value: string;
+}
+
 interface Settings {
   // 一般設定
   theme: 'light' | 'dark' | 'system';
@@ -74,7 +79,7 @@ export function useSettings() {
     try {
       const items = await get('/settings');
       const newSettings = { ...defaultSettings };
-      items.forEach((item) => {
+      items.forEach((item: SettingsItem) => {
         try {
           (newSettings as any)[item.key] = JSON.parse(item.value);
         } catch {

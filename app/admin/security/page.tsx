@@ -7,7 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { Badge } from "@/components/ui/badge"
 import { ShieldCheck, Lock, Key, Activity, AlertTriangle, Network } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
-import { SecuritySettings } from "@/lib/types"
+import type { SecuritySettings } from "@/app/lib/types"
 import { 
   Select,
   SelectContent,
@@ -22,17 +22,31 @@ import { StatsCard } from "@/components/admin/stats-card"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { Sidebar } from "@/components/admin/sidebar"
 import { AdminNav } from "@/components/admin/nav"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AccountLockoutSettings } from "@/app/admin/security/components/account-lockout-settings"
+import { PasswordPolicySettings } from "@/app/admin/security/components/password-policy-settings"
+import { MFASettings } from "@/app/admin/security/components/mfa-settings"
+import { SessionSettings } from "@/app/admin/security/components/session-settings"
+import { IPRestrictionSettings } from "@/app/admin/security/components/ip-restriction-settings"
+import { WAFSettings } from "@/app/admin/security/components/waf-settings"
+import { BackupSettings } from "@/app/admin/security/components/backup-settings"
+import { VulnerabilitySettings } from "@/app/admin/security/components/vulnerability-settings"
 
-export default function SecurityPage() {
+export default function SecuritySettingsPage() {
   const { data: session, status } = useSession()
   const securityScore = 85 // 仮の値
 
   const { data: settings, isLoading } = useQuery<SecuritySettings>({
     queryKey: ['security-settings'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/security/settings')
+      const res = await fetch('/api/admin/security')
       if (!res.ok) throw new Error('Failed to fetch security settings')
-      return res.json()
+      const data = await res.json()
+      return {
+        ...data,
+        createdAt: new Date(data.createdAt),
+        updatedAt: new Date(data.updatedAt),
+      }
     },
     enabled: !!session && ["super_admin", "admin"].includes(session.user?.role as string)
   })
@@ -48,6 +62,102 @@ export default function SecurityPage() {
   if (!["super_admin", "admin"].includes(session.user?.role as string)) {
     redirect("/dashboard")
   }
+
+  const defaultSettings: SecuritySettings = {
+    accountLockout: {
+      maxLoginAttempts: 5,
+      lockoutDuration: 30,
+      lockoutDurationType: "minutes",
+      autoUnlock: true,
+      notifyAdmin: true,
+    },
+    passwordPolicy: {
+      minLength: 8,
+      maxLength: 32,
+      requireUppercase: true,
+      requireLowercase: true,
+      requireNumbers: true,
+      requireSymbols: true,
+      expiryDays: 90,
+      historyCount: 5,
+      showStrengthMeter: true,
+    },
+    mfaSettings: {
+      requireMFA: false,
+      allowedMethods: ["authenticator", "sms", "email"],
+      backupCodesCount: 10,
+      mfaGracePeriod: 7,
+      rememberDevice: true,
+      rememberDeviceDuration: 30,
+    },
+    sessionSettings: {
+      sessionTimeout: 30,
+      timeoutUnit: "minutes",
+      idleTimeout: 15,
+      idleTimeoutUnit: "minutes",
+      maxConcurrentSessions: 3,
+      forceLogoutOnPasswordChange: true,
+      forceLogoutOnRoleChange: true,
+      enableSessionMonitoring: true,
+    },
+    ipRestriction: {
+      enableIPRestriction: false,
+      allowedIPs: ["192.168.1.0/24", "10.0.0.0/8"],
+      blockUnknownIPs: true,
+      notifyOnBlock: true,
+      logBlockedAttempts: true,
+    },
+    wafSettings: {
+      enableWAF: false,
+      mode: "detection",
+      rules: [
+        {
+          id: "sql-injection",
+          name: "SQLインジェクション対策",
+          enabled: true,
+          priority: 1,
+        },
+      ],
+      customRules: [],
+      logLevel: "info",
+      alertThreshold: 10,
+    },
+    backupSettings: {
+      enableAutoBackup: true,
+      backupSchedule: "daily",
+      backupTime: "00:00",
+      retentionPeriod: 30,
+      backupTypes: {
+        database: true,
+        files: true,
+        configurations: true,
+      },
+      compressionEnabled: true,
+      encryptionEnabled: true,
+      storageLocation: "local",
+      notifyOnSuccess: true,
+      notifyOnFailure: true,
+    },
+    vulnerabilitySettings: {
+      enableScheduledScan: true,
+      scanSchedule: "weekly",
+      scanTime: "00:00",
+      scanTargets: {
+        webapp: true,
+        api: true,
+        database: true,
+        server: true,
+      },
+      notifyOnCompletion: true,
+      notifyOnVulnerability: true,
+      severityThreshold: "medium",
+      autoRemediation: false,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
+  const mergedSettings = settings || defaultSettings
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -88,14 +198,14 @@ export default function SecurityPage() {
             <StatsCard 
               icon={Lock} 
               label="2FA状態" 
-              value={settings?.twoFactorEnabled ? "有効" : "無効"}
+              value={mergedSettings.mfaSettings.requireMFA ? "有効" : "無効"}
               description="二要素認証"
-              trend={settings?.twoFactorEnabled ? { value: 40, isPositive: true } : undefined}
+              trend={mergedSettings.mfaSettings.requireMFA ? { value: 40, isPositive: true } : undefined}
             />
             <StatsCard 
               icon={Activity} 
               label="セッションタイムアウト" 
-              value={settings?.sessionTimeout || "未設定"}
+              value={`${mergedSettings.sessionSettings.sessionTimeout}${mergedSettings.sessionSettings.timeoutUnit === "minutes" ? "分" : mergedSettings.sessionSettings.timeoutUnit === "hours" ? "時間" : "日"}`}
               description="自動ログアウト期間"
             />
             <StatsCard 
@@ -123,11 +233,11 @@ export default function SecurityPage() {
                       すべての管理者アカウントに2FAを要求
                     </p>
                   </div>
-                  <Switch checked={settings?.twoFactorEnabled} />
+                  <Switch checked={mergedSettings.mfaSettings.requireMFA} />
                 </div>
                 <div className="space-y-2">
                   <Label>パスワード有効期限</Label>
-                  <Select defaultValue={settings?.passwordExpiry}>
+                  <Select defaultValue={mergedSettings.passwordPolicy.expiryDays.toString()}>
                     <SelectTrigger>
                       <SelectValue placeholder="有効期限を選択" />
                     </SelectTrigger>
@@ -156,11 +266,11 @@ export default function SecurityPage() {
                       特定のIP範囲からのアクセスを制限
                     </p>
                   </div>
-                  <Switch checked={settings?.ipRestrictionEnabled} />
+                  <Switch checked={mergedSettings.ipRestriction.enableIPRestriction} />
                 </div>
                 <div className="space-y-2">
                   <Label>セッションタイムアウト</Label>
-                  <Select defaultValue={settings?.sessionTimeout}>
+                  <Select defaultValue={mergedSettings.sessionSettings.sessionTimeout.toString()}>
                     <SelectTrigger>
                       <SelectValue placeholder="タイムアウト時間を選択" />
                     </SelectTrigger>
@@ -182,6 +292,31 @@ export default function SecurityPage() {
               設定を保存
             </Button>
           </div>
+
+          <Tabs defaultValue="account" className="space-y-4 mt-8">
+            <TabsList>
+              <TabsTrigger value="account">アカウントセキュリティ</TabsTrigger>
+              <TabsTrigger value="access">アクセス制御</TabsTrigger>
+              <TabsTrigger value="system">システムセキュリティ</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="account" className="space-y-4">
+              <AccountLockoutSettings initialSettings={mergedSettings.accountLockout} />
+              <PasswordPolicySettings initialSettings={mergedSettings.passwordPolicy} />
+              <MFASettings initialSettings={mergedSettings.mfaSettings} />
+              <SessionSettings initialSettings={mergedSettings.sessionSettings} />
+            </TabsContent>
+
+            <TabsContent value="access" className="space-y-4">
+              <IPRestrictionSettings initialSettings={mergedSettings.ipRestriction} />
+              <WAFSettings initialSettings={mergedSettings.wafSettings} />
+            </TabsContent>
+
+            <TabsContent value="system" className="space-y-4">
+              <BackupSettings initialSettings={mergedSettings.backupSettings} />
+              <VulnerabilitySettings initialSettings={mergedSettings.vulnerabilitySettings} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

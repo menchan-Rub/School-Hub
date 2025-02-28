@@ -42,9 +42,6 @@ model User {
   image         String?
   passwordHash  String
   role          String         @default("user")
-  mfaEnabled    Boolean       @default(false)
-  mfaSecret     String?
-  lastPasswordChange DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
   userSessions  UserSession[]
@@ -54,9 +51,6 @@ model User {
   ownedServers  Server[]
   messages      Message[]
   auditLogs     AuditLog[]
-  loginAttempts LoginAttempt[]
-  lockedAccounts AccountLockout[] @relation("User")
-  unlockedAccounts AccountLockout[] @relation("UnlockedBy")
 }
 
 model VerificationToken {
@@ -156,64 +150,16 @@ model SystemSettings {
   updatedAt     DateTime @updatedAt
 }
 
-model PasswordPolicy {
+model SecuritySettings {
   id                    Int      @id @default(1)
-  minLength            Int      @default(8)
-  maxLength            Int      @default(32)
-  requireUppercase     Boolean  @default(true)
-  requireLowercase     Boolean  @default(true)
-  requireNumbers       Boolean  @default(true)
-  requireSpecialChars  Boolean  @default(true)
-  passwordHistory      Int      @default(3)
-  expiryDays          Int      @default(90)
+  accountLockout       Json
+  passwordPolicy       Json
+  mfaSettings         Json
+  sessionSettings     Json
+  ipRestriction       Json
+  wafSettings         Json
+  backupSettings      Json
+  vulnerabilitySettings Json
+  createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-}
-
-model LoginAttempt {
-  id        String   @id @default(cuid())
-  userId    String?
-  ipAddress String
-  success   Boolean
-  createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([ipAddress])
-}
-
-model AccountLockout {
-  id              String   @id @default(cuid())
-  userId          String
-  reason          String
-  lockedAt        DateTime @default(now())
-  unlockAt        DateTime
-  unlockedAt      DateTime?
-  unlockedBy      String?
-  user            User     @relation(fields: [userId], references: [id])
-  unlockedByUser  User?    @relation("UnlockedBy", fields: [unlockedBy], references: [id])
-
-  @@index([userId])
-}
-
-model IPAllowList {
-  id          String   @id @default(cuid())
-  ipAddress   String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([ipAddress])
-}
-
-model WAFRule {
-  id          String   @id @default(cuid())
-  name        String
-  pattern     String
-  action      String   // BLOCK, ALERT, ALLOW
-  enabled     Boolean  @default(true)
-  priority    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@unique([name])
 }

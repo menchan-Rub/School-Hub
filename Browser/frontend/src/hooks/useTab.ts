@@ -157,14 +157,18 @@ export function useTabs() {
     try {
       const cachedPage = url ? pageCache.get(url) : undefined;
       if (cachedPage) {
-        const tab = await post('/tabs', { url, content: cachedPage });
-        createTab(url);
-        setTabs(prev => [...prev, tab]);
-        setActiveTabId(tab.id);
-        return tab;
+        const response = await post('/tabs', { url, content: cachedPage });
+        const tab = response as unknown as Tab;
+        if (url) {
+          createTab(url);
+          setTabs(prev => [...prev, tab]);
+          setActiveTabId(tab.id);
+          return tab;
+        }
       }
 
-      const tab = await post('/tabs', { url });
+      const response = await post('/tabs', { url });
+      const tab = response as unknown as Tab;
       createTab(url || '');
       setTabs(prev => [...prev, tab]);
       setActiveTabId(tab.id);

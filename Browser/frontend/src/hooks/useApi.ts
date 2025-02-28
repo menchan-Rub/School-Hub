@@ -1,10 +1,21 @@
 import { useState, useCallback } from 'react';
-import api from '../utils/api';
+import { api } from '../utils/api';
 
 interface ApiState<T> {
   data: T | null;
   loading: boolean;
   error: Error | null;
+}
+
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+}
+
+interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
 }
 
 export function useApi<T>(initialData: T | null = null) {
@@ -22,7 +33,7 @@ export function useApi<T>(initialData: T | null = null) {
         method,
         url,
         data,
-      });
+      }) as ApiResponse<T>;
       setState({ data: response.data, loading: false, error: null });
       return response.data;
     } catch (error) {
@@ -61,7 +72,7 @@ export function useApi<T>(initialData: T | null = null) {
 }
 
 export function useAuth() {
-  const { post } = useApi();
+  const { post } = useApi<AuthResponse>();
 
   const login = useCallback(
     async (username: string, password: string) => {

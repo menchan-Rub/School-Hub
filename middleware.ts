@@ -5,19 +5,19 @@ import { getToken } from 'next-auth/jwt'
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req })
   const isAuth = !!token
-  const isAuthPage = req.nextUrl.pathname === "/"
 
-  // 認証ページでの処理
-  if (isAuthPage) {
-    if (isAuth) {
-      return NextResponse.redirect(new URL("/dashboard", req.url))
-    }
+  // システムルート以外はすべて認証が必要
+  const systemPaths = ['/api', '/_next', '/favicon.ico']
+  const isSystemPath = systemPaths.some(path => req.nextUrl.pathname.startsWith(path))
+
+  // システムパスの場合は処理をスキップ
+  if (isSystemPath) {
     return null
   }
 
-  // 認証が必要なページでの処理
-  if (!isAuth) {
-    return NextResponse.redirect(new URL("/", req.url))
+  // ルートページ以外へのアクセスを制限
+  if (req.nextUrl.pathname !== '/') {
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
   return null
