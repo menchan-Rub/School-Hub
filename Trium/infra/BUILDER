@@ -1,0 +1,115 @@
+## sandbox perms
+
+30 55
+sudo chown root chrome-sandbox &&
+sudo chmod 4755 chrome-sandbox &&
+sudo chmod 4755 chrome_sandbox &&
+sudo chmod 4755 chrome_sandbox
+
+---------------------------------------------------------------------------------------------
+
+## Misc
+Native Theme
+base::CommandLine::ForCurrentProcess()->HasSwitch("force-dark-mode");
+
+Media Switches
+base::CommandLine::ForCurrentProcess()->HasSwitch("no-autoplay");
+
+kShowHomeButton and kDoNotTrack
+
+CssSelectorFragmentAnchor
+Prefetchpri
+// Check if the CPU has the required instruction set to run the Speech
+
+kEnableTabMuting & PlatformHEVCDecoderSupport & kVaapiVideoDecode & kVaapiVideoEncode & Vp9kSVCHWDecoding & kD3D11Vp9kSVCHWDecoding & DeprecateLowUsageCodecs & kUseChromeOSDirectVideoDecoder
+
+---------------------------------------------------------------------------------------------
+
+## Disable AVX-512
+
+        "-mno-avx512f",
+        "-mno-avx512pf",
+        "-mno-avx512er",
+        "-mno-avx512cd",
+        "-mno-avx512vl",
+        "-mno-avx512bw",
+        "-mno-avx512dq",
+        "-mno-avx512ifma",
+        "-mno-avx512vbmi",
+        "-mno-avx512vbmi2",
+        "-mno-avx512bf16",
+        "-mno-avx512fp16",
+        "-mno-avx512bitalg",
+        "-mno-avx512vpopcntdq",
+        "-mno-avx512vp2intersect",
+        "-mno-avx512vnni",
+
+## Old RobRich999 notes
+
+  common_optimize_on_cflags = [
+    "-mllvm", "-extra-vectorizer-passes",
+    "-mllvm", "-enable-cond-stores-vec",
+    "-mllvm", "-slp-vectorize-hor-store",
+    "-mllvm", "-enable-loopinterchange",
+    "-mllvm", "-enable-loop-distribute",
+    "-mllvm", "-enable-unroll-and-jam",
+    "-mllvm", "-enable-loop-flatten",
+    "-mllvm", "-interleave-small-loop-scalar-reduction",
+    "-mllvm", "-unroll-runtime-multi-exit",
+    "-mllvm", "-aggressive-ext-opt",
+    "-mllvm", "-polly",
+    "-mllvm", "-polly-detect-profitability-min-per-loop-insts=40",
+    "-mllvm", "-polly-invariant-load-hoisting",
+    "-mllvm", "-polly-position=early",
+    "-mllvm", "-polly-vectorizer=stripmine",
+    "-mllvm", "-polly-run-inliner",
+    "-mllvm", "-polly-enable-delicm=true",
+    "-Xclang", "-Rpass-analysis=polly",
+  ]
+
+  common_optimize_on_ldflags = [
+    "-Wl,-mllvm,-extra-vectorizer-passes",
+    "-Wl,-mllvm,-enable-cond-stores-vec",
+    "-Wl,-mllvm,-slp-vectorize-hor-store",
+    "-Wl,-mllvm,-enable-loopinterchange",
+    "-Wl,-mllvm,-enable-loop-distribute",
+    "-Wl,-mllvm,-enable-unroll-and-jam",
+    "-Wl,-mllvm,-enable-loop-flatten",
+    "-Wl,-mllvm,-interleave-small-loop-scalar-reduction",
+    "-Wl,-mllvm,-unroll-runtime-multi-exit",
+    "-Wl,-mllvm,-aggressive-ext-opt",
+  ]
+  
+  common_optimize_on_cflags = [
+    "-mllvm", "-extra-vectorizer-passes",
+    "-mllvm", "-enable-cond-stores-vec",
+    "-mllvm", "-slp-vectorize-hor-store",
+    "-mllvm", "-enable-loopinterchange",
+    "-mllvm", "-enable-loop-distribute",
+    "-mllvm", "-enable-unroll-and-jam",
+    "-mllvm", "-enable-loop-flatten",
+    "-mllvm", "-interleave-small-loop-scalar-reduction",
+    "-mllvm", "-unroll-runtime-multi-exit",
+    "-mllvm", "-aggressive-ext-opt",
+    "-mllvm", "-polly",
+    "-mllvm", "-polly-detect-profitability-min-per-loop-insts=40",
+    "-mllvm", "-polly-invariant-load-hoisting",
+    "-mllvm", "-polly-position=early",
+    "-mllvm", "-polly-vectorizer=stripmine",
+    "-mllvm", "-polly-run-inliner",
+    "-mllvm", "-polly-enable-delicm=true",
+    "-Xclang", "-Rpass-analysis=polly",
+  ]
+
+  common_optimize_on_ldflags = [
+    "-mllvm:-extra-vectorizer-passes",
+    "-mllvm:-enable-cond-stores-vec",
+    "-mllvm:-slp-vectorize-hor-store",
+    "-mllvm:-enable-loopinterchange",
+    "-mllvm:-enable-loop-distribute",
+    "-mllvm:-enable-unroll-and-jam",
+    "-mllvm:-enable-loop-flatten",
+    "-mllvm:-interleave-small-loop-scalar-reduction",
+    "-mllvm:-unroll-runtime-multi-exit",
+    "-mllvm:-aggressive-ext-opt",
+  ]

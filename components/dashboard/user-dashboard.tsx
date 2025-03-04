@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Users, Globe, Settings, Shield, Clock } from "lucide-react"
 import { useNavigationStore } from "@/lib/stores/navigation-store"
+import { useRouter } from "next/navigation"
 
 interface UserDashboardProps {
   isAdmin?: boolean;
@@ -13,6 +14,7 @@ interface UserDashboardProps {
 export function UserDashboard({
   isAdmin = false
 }: UserDashboardProps) {
+  const router = useRouter()
   const [usageTime, setUsageTime] = useState(0)
   const { setActiveView } = useNavigationStore()
 
@@ -41,26 +43,9 @@ export function UserDashboard({
 
   const handleChatOpen = useCallback(() => setActiveView('chat'), [setActiveView])
   const handleFriendsOpen = useCallback(() => setActiveView('friends'), [setActiveView])
-  const handleBrowserOpen = useCallback(async () => {
-    try {
-      const response = await fetch('/api/browser/launch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('ブラウザの起動に失敗しました')
-      }
-
-      const data = await response.json()
-      console.log('ブラウザが起動しました:', data)
-      setActiveView('browser')
-    } catch (error) {
-      console.error('ブラウザの起動中にエラーが発生しました:', error)
-    }
-  }, [setActiveView])
+  const handleBrowserOpen = useCallback(() => {
+    router.push('/browser')
+  }, [router])
   const handleSettingsOpen = useCallback(() => setActiveView('settings'), [setActiveView])
   const handleAdminOpen = useCallback(() => {
     if (isAdmin) {

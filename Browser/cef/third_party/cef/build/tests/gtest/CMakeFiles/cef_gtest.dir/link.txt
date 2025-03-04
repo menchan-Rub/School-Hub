@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcef_gtest.a CMakeFiles/cef_gtest.dir/src/gtest-all.cc.o CMakeFiles/cef_gtest.dir/teamcity/src/teamcity_gtest.cpp.o CMakeFiles/cef_gtest.dir/teamcity/src/teamcity_messages.cpp.o
-/usr/bin/ranlib libcef_gtest.a

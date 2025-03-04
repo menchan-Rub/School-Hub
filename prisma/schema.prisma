@@ -51,6 +51,9 @@ model User {
   ownedServers  Server[]
   messages      Message[]
   auditLogs     AuditLog[]
+  createdRooms    ChatRoom[] @relation("CreatedRooms")
+  participantIn   ChatRoom[] @relation("RoomParticipants")
+  matrixToken     String?    @db.Text // Matrixのアクセストークンを保存
 }
 
 model VerificationToken {
@@ -162,4 +165,13 @@ model SecuritySettings {
   vulnerabilitySettings Json
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+model ChatRoom {
+  id          String   @id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   User     @relation("CreatedRooms", fields: [createdById], references: [id])
+  createdById String
+  participants User[]  @relation("RoomParticipants")
 }
