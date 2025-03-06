@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useRef, MutableRefObject } from "react"
 import { useEffect, useState } from "react"
 import SplitPane from "react-split-pane"
 import { useRouter } from "next/navigation"
@@ -14,7 +14,7 @@ interface Tab {
   url: string
   title: string
   isActive: boolean
-  iframeRef?: React.RefObject<HTMLIFrameElement | null>
+  iframeRef?: MutableRefObject<HTMLIFrameElement | null>
 }
 
 interface CustomSplitPaneProps {
@@ -47,11 +47,10 @@ const BrowserNavigation: React.FC<{
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    let url = inputUrl
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = `https://${url}`
+    console.log('Form submitted with URL:', inputUrl)
+    if (inputUrl.trim()) {
+      onUrlChange(inputUrl.trim())
     }
-    onUrlChange(url)
   }
 
   return (
@@ -95,108 +94,114 @@ const BrowserNavigation: React.FC<{
 
 export default function BrowserPage() {
   const router = useRouter()
-  const [tabs, setTabs] = useState<Tab[]>([])
-  const [splitMode, setSplitMode] = useState<'horizontal' | 'vertical'>('horizontal')
-  const [leftTabs, setLeftTabs] = useState<Tab[]>([
+  const [tabs, setTabs] = useState<Tab[]>([
     {
       id: '1',
       url: 'https://www.google.com',
       title: 'Google',
       isActive: true,
-      iframeRef: React.createRef<HTMLIFrameElement>()
-    }
-  ])
-  const [rightTabs, setRightTabs] = useState<Tab[]>([
-    {
-      id: '2',
-      url: 'https://www.bing.com',
-      title: 'Bing',
-      isActive: true,
-      iframeRef: React.createRef<HTMLIFrameElement>()
+      iframeRef: React.createRef<HTMLIFrameElement>() as MutableRefObject<HTMLIFrameElement | null>
     }
   ])
 
-  const addTab = (side: 'left' | 'right') => {
+  useEffect(() => {
+    console.log('BrowserPage mounted')
+    return () => {
+      console.log('BrowserPage unmounted')
+    }
+  }, [])
+
+  const addTab = () => {
     const newTab: Tab = {
       id: Math.random().toString(36).substr(2, 9),
       url: 'https://www.google.com',
       title: 'New Tab',
       isActive: true,
-      iframeRef: React.createRef<HTMLIFrameElement>()
+      iframeRef: React.createRef<HTMLIFrameElement>() as MutableRefObject<HTMLIFrameElement | null>
     }
-
-    if (side === 'left') {
-      setLeftTabs(prev => [...prev.map(t => ({ ...t, isActive: false })), newTab])
-    } else {
-      setRightTabs(prev => [...prev.map(t => ({ ...t, isActive: false })), newTab])
-    }
+    setTabs(prev => [...prev.map(t => ({ ...t, isActive: false })), newTab])
   }
 
-  const removeTab = (side: 'left' | 'right', tabId: string) => {
-    if (side === 'left') {
-      setLeftTabs(prev => prev.filter(t => t.id !== tabId))
-    } else {
-      setRightTabs(prev => prev.filter(t => t.id !== tabId))
-    }
+  const removeTab = (tabId: string) => {
+    setTabs(prev => prev.filter(t => t.id !== tabId))
   }
 
-  const activateTab = (side: 'left' | 'right', tabId: string) => {
-    if (side === 'left') {
-      setLeftTabs(prev => prev.map(t => ({ ...t, isActive: t.id === tabId })))
-    } else {
-      setRightTabs(prev => prev.map(t => ({ ...t, isActive: t.id === tabId })))
-    }
+  const activateTab = (tabId: string) => {
+    setTabs(prev => prev.map(t => ({ ...t, isActive: t.id === tabId })))
   }
 
-  const updateTabUrl = (side: 'left' | 'right', tabId: string, url: string) => {
-    if (side === 'left') {
-      setLeftTabs(prev => prev.map(t => t.id === tabId ? { ...t, url } : t))
-    } else {
-      setRightTabs(prev => prev.map(t => t.id === tabId ? { ...t, url } : t))
-    }
+  const updateTabUrl = (tabId: string, url: string) => {
+    setTabs(prev => prev.map(t => t.id === tabId ? { ...t, url } : t))
   }
 
-  const updateTabTitle = (side: 'left' | 'right', tabId: string, title: string) => {
-    if (side === 'left') {
-      setLeftTabs(prev => prev.map(t => t.id === tabId ? { ...t, title } : t))
-    } else {
-      setRightTabs(prev => prev.map(t => t.id === tabId ? { ...t, title } : t))
-    }
+  const updateTabTitle = (tabId: string, title: string) => {
+    setTabs(prev => prev.map(t => t.id === tabId ? { ...t, title } : t))
   }
 
-  const toggleSplitMode = () => {
-    setSplitMode(prev => prev === 'horizontal' ? 'vertical' : 'horizontal')
-  }
-
-  const getActiveTab = (side: 'left' | 'right') => {
-    const tabs = side === 'left' ? leftTabs : rightTabs
+  const getActiveTab = () => {
     return tabs.find(t => t.isActive)
   }
 
-  const handleIframeLoad = (side: 'left' | 'right', tabId: string) => {
-    const tabs = side === 'left' ? leftTabs : rightTabs
+  const handleIframeLoad = (tabId: string) => {
     const tab = tabs.find(t => t.id === tabId)
     if (tab?.iframeRef?.current) {
       try {
-        const title = tab.iframeRef.current.contentDocument?.title
-        if (title) {
-          updateTabTitle(side, tabId, title)
+        const iframe = tab.iframeRef.current;
+        const iframeWindow = iframe.contentWindow;
+        
+        // タイトルの更新
+        if (iframe.contentDocument?.title) {
+          updateTabTitle(tabId, iframe.contentDocument.title)
+        }
+
+        // カスタムスクリプトの注入
+        if (iframeWindow) {
+          iframeWindow.addEventListener('keydown', (e) => {
+            // Ctrl+F5 でハードリロード
+            if (e.ctrlKey && e.key === 'r') {
+              e.preventDefault();
+              iframe.src = iframe.src;
+            }
+          });
         }
       } catch (error) {
-        console.error('Failed to get iframe title:', error)
+        console.error('Failed to handle iframe load:', error)
       }
     }
   }
 
+  const handleUrlSubmit = (url: string) => {
+    console.log('handleUrlSubmit called with:', url)
+    const activeTab = getActiveTab()
+    if (activeTab) {
+      let processedUrl = url.trim()
+      console.log('Processing URL:', processedUrl)
+
+      // 検索クエリの処理
+      if (!processedUrl.includes('.') || processedUrl.includes(' ')) {
+        processedUrl = `https://www.google.com/search?q=${encodeURIComponent(processedUrl)}`
+        console.log('Converted to search URL:', processedUrl)
+      } else if (!processedUrl.match(/^https?:\/\//)) {
+        processedUrl = `https://${processedUrl}`
+        console.log('Added https:', processedUrl)
+      }
+
+      console.log('Final URL:', processedUrl)
+      updateTabUrl(activeTab.id, processedUrl)
+
+      // iframeを強制的に更新
+      const iframe = activeTab.iframeRef?.current
+      if (iframe) {
+        iframe.src = `/proxy/${processedUrl.replace(/^https?:\/\//, '')}`
+      }
+    } else {
+      console.error('No active tab found')
+    }
+  }
+
   return (
-    <div className="h-screen w-screen flex flex-col bg-background">
+    <div className="flex flex-col w-full h-full bg-background">
       <div className="flex items-center justify-between p-2 border-b">
-        <Button
-          variant="outline"
-          onClick={toggleSplitMode}
-        >
-          {splitMode === 'horizontal' ? '横分割' : '縦分割'}
-        </Button>
         <Button
           variant="ghost"
           onClick={() => router.push("/")}
@@ -205,191 +210,97 @@ export default function BrowserPage() {
         </Button>
       </div>
 
-      <div className="flex-grow">
-        <CustomSplitPane
-          split={splitMode}
-          minSize={200}
-          defaultSize="50%"
-        >
-          <div className="h-full flex flex-col">
-            <BrowserNavigation
-              onBack={() => {
-                const activeTab = getActiveTab('left')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.history.back()
-                  } catch (error) {
-                    console.error('Failed to go back:', error)
-                  }
-                }
-              }}
-              onForward={() => {
-                const activeTab = getActiveTab('left')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.history.forward()
-                  } catch (error) {
-                    console.error('Failed to go forward:', error)
-                  }
-                }
-              }}
-              onRefresh={() => {
-                const activeTab = getActiveTab('left')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.location.reload()
-                  } catch (error) {
-                    console.error('Failed to refresh:', error)
-                  }
-                }
-              }}
-              onUrlChange={(url) => {
-                const activeTab = getActiveTab('left')
-                if (activeTab) {
-                  updateTabUrl('left', activeTab.id, url)
-                }
-              }}
-              currentUrl={getActiveTab('left')?.url || ''}
-            />
-            <div className="flex items-center p-2 bg-background border-b">
-              <div className="flex-grow flex space-x-2 overflow-x-auto">
-                {leftTabs.map(tab => (
-                  <div
-                    key={tab.id}
-                    className={cn(
-                      "flex items-center px-4 py-2 rounded-md cursor-pointer transition-colors",
-                      tab.isActive
-                        ? "bg-secondary text-secondary-foreground"
-                        : "hover:bg-secondary/80"
-                    )}
-                    onClick={() => activateTab('left', tab.id)}
-                  >
-                    <span className="truncate max-w-[150px]">{tab.title}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-2 h-auto p-0 hover:bg-transparent"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeTab('left', tab.id)
-                      }}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => addTab('left')}
-                className="ml-2"
+      <div className="flex-1 flex flex-col min-h-0">
+        <BrowserNavigation
+          onBack={() => {
+            const activeTab = getActiveTab()
+            if (activeTab?.iframeRef?.current) {
+              try {
+                activeTab.iframeRef.current.contentWindow?.history.back()
+              } catch (error) {
+                console.error('Failed to go back:', error)
+              }
+            }
+          }}
+          onForward={() => {
+            const activeTab = getActiveTab()
+            if (activeTab?.iframeRef?.current) {
+              try {
+                activeTab.iframeRef.current.contentWindow?.history.forward()
+              } catch (error) {
+                console.error('Failed to go forward:', error)
+              }
+            }
+          }}
+          onRefresh={() => {
+            const activeTab = getActiveTab()
+            if (activeTab?.iframeRef?.current) {
+              try {
+                activeTab.iframeRef.current.contentWindow?.location.reload()
+              } catch (error) {
+                console.error('Failed to refresh:', error)
+              }
+            }
+          }}
+          onUrlChange={handleUrlSubmit}
+          currentUrl={getActiveTab()?.url || ''}
+        />
+        <div className="flex items-center p-2 bg-background border-b">
+          <div className="flex-grow flex space-x-2 overflow-x-auto">
+            {tabs.map(tab => (
+              <div
+                key={tab.id}
+                className={cn(
+                  "flex items-center px-4 py-2 rounded-md cursor-pointer transition-colors",
+                  tab.isActive
+                    ? "bg-secondary text-secondary-foreground"
+                    : "hover:bg-secondary/80"
+                )}
+                onClick={() => activateTab(tab.id)}
               >
-                +
-              </Button>
-            </div>
-            <div className="flex-grow">
-              {leftTabs.map(tab => (
-                <iframe
-                  key={tab.id}
-                  ref={tab.iframeRef}
-                  src={tab.url}
-                  className={`w-full h-full ${tab.isActive ? 'block' : 'hidden'}`}
-                  onLoad={() => handleIframeLoad('left', tab.id)}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="h-full flex flex-col">
-            <BrowserNavigation
-              onBack={() => {
-                const activeTab = getActiveTab('right')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.history.back()
-                  } catch (error) {
-                    console.error('Failed to go back:', error)
-                  }
-                }
-              }}
-              onForward={() => {
-                const activeTab = getActiveTab('right')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.history.forward()
-                  } catch (error) {
-                    console.error('Failed to go forward:', error)
-                  }
-                }
-              }}
-              onRefresh={() => {
-                const activeTab = getActiveTab('right')
-                if (activeTab?.iframeRef?.current) {
-                  try {
-                    activeTab.iframeRef.current.contentWindow?.location.reload()
-                  } catch (error) {
-                    console.error('Failed to refresh:', error)
-                  }
-                }
-              }}
-              onUrlChange={(url) => {
-                const activeTab = getActiveTab('right')
-                if (activeTab) {
-                  updateTabUrl('right', activeTab.id, url)
-                }
-              }}
-              currentUrl={getActiveTab('right')?.url || ''}
-            />
-            <div className="flex items-center p-2 bg-background border-b">
-              <div className="flex-grow flex space-x-2 overflow-x-auto">
-                {rightTabs.map(tab => (
-                  <div
-                    key={tab.id}
-                    className={cn(
-                      "flex items-center px-4 py-2 rounded-md cursor-pointer transition-colors",
-                      tab.isActive
-                        ? "bg-secondary text-secondary-foreground"
-                        : "hover:bg-secondary/80"
-                    )}
-                    onClick={() => activateTab('right', tab.id)}
-                  >
-                    <span className="truncate max-w-[150px]">{tab.title}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-2 h-auto p-0 hover:bg-transparent"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeTab('right', tab.id)
-                      }}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                ))}
+                <span className="truncate max-w-[150px]">{tab.title}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-2 h-auto p-0 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removeTab(tab.id)
+                  }}
+                >
+                  ×
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => addTab('right')}
-                className="ml-2"
-              >
-                +
-              </Button>
-            </div>
-            <div className="flex-grow">
-              {rightTabs.map(tab => (
-                <iframe
-                  key={tab.id}
-                  ref={tab.iframeRef}
-                  src={tab.url}
-                  className={`w-full h-full ${tab.isActive ? 'block' : 'hidden'}`}
-                  onLoad={() => handleIframeLoad('right', tab.id)}
-                />
-              ))}
-            </div>
+            ))}
           </div>
-        </CustomSplitPane>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={addTab}
+            className="ml-2"
+          >
+            +
+          </Button>
+        </div>
+        <div className="flex-1 relative">
+          {tabs.map(tab => {
+            console.log('Rendering iframe for tab:', tab.url)
+            const proxyUrl = tab.url.replace(/^https?:\/\//, '')
+            console.log('Proxy URL:', proxyUrl)
+            
+            return (
+              <iframe
+                key={tab.id}
+                ref={tab.iframeRef}
+                src={`/proxy/${proxyUrl}`}
+                className={`w-full h-full absolute inset-0 ${tab.isActive ? 'block' : 'hidden'}`}
+                onLoad={() => handleIframeLoad(tab.id)}
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-presentation"
+                loading="lazy"
+              />
+            )
+          })}
+        </div>
       </div>
     </div>
   )

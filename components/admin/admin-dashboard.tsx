@@ -4,15 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AdminStats } from "@/lib/types"
 
 interface AdminDashboardProps {
-  stats: {
-    totalUsers: number
-    activeUsers: number
-    totalServers: number
-    totalMessages: number
-    monthlyActiveUsers: Array<{ date: string; count: number }>
-  }
+  stats: AdminStats
   onHomeClick: () => void
 }
 

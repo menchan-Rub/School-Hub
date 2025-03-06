@@ -1,12 +1,7 @@
 import { create } from 'zustand'
 
-export type NavigationView = 
+type View = 
   | 'dashboard'
-  | 'friends'
-  | 'chat'
-  | 'notifications'
-  | 'browser'
-  | 'bookmarks'
   | 'admin-overview'
   | 'admin-users'
   | 'admin-servers'
@@ -16,16 +11,18 @@ export type NavigationView =
   | 'admin-audit-logs'
   | 'admin-bans'
   | 'admin-settings'
+  | 'friends'
+  | 'chat'
+  | 'notifications'
+  | 'browser'
+  | 'bookmarks'
 
 interface NavigationStore {
-  activeView: NavigationView
-  setActiveView: (view: NavigationView) => void
+  activeView: View
+  setActiveView: (view: View) => void
 }
 
 export const useNavigationStore = create<NavigationStore>((set) => ({
   activeView: 'dashboard',
-  setActiveView: (view) => {
-    console.log('Navigating to:', view)
-    set({ activeView: view })
-  },
+  setActiveView: (view) => set({ activeView: view }),
 })) 

@@ -44,8 +44,8 @@ export function UserDashboard({
   const handleChatOpen = useCallback(() => setActiveView('chat'), [setActiveView])
   const handleFriendsOpen = useCallback(() => setActiveView('friends'), [setActiveView])
   const handleBrowserOpen = useCallback(() => {
-    router.push('/browser')
-  }, [router])
+    setActiveView('browser')
+  }, [setActiveView])
   const handleSettingsOpen = useCallback(() => setActiveView('settings'), [setActiveView])
   const handleAdminOpen = useCallback(() => {
     if (isAdmin) {

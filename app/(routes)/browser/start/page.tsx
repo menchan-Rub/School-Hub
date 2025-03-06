@@ -1,5 +1,8 @@
-import { StartPage } from '@/app/components/browser/StartPage';
+"use client"
+
+import React from 'react'
+import BrowserPage from '@/app/browser/page'
 
 export default function Page() {
-  return <StartPage />;
+  return <BrowserPage />
 } 

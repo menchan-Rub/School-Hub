@@ -17,20 +17,41 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    esmExternals: 'loose',
     webpackBuildWorker: true,
+    esmExternals: 'loose'
   },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' *"
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          }
+        ]
+      }
+    ];
   },
   webpack: (config, { dev, isServer }) => {
-    // Add alias for '@' to point to root directory
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.join(__dirname)
     };
 
-    // HTMLローダーの設定を追加
     config.module.rules.push({
       test: /\.html$/,
       use: 'ignore-loader'
@@ -48,18 +69,6 @@ const nextConfig = {
     config.externals.push({
       "utf-8-validate": "commonjs utf-8-validate",
       bufferutil: "commonjs bufferutil",
-    })
-
-    // Babelの設定を追加
-    config.module.rules.push({
-      test: /\.(js|jsx|ts|tsx)$/,
-      exclude: /node_modules/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          cacheDirectory: true,
-        },
-      },
     });
 
     return config;
@@ -69,9 +78,13 @@ const nextConfig = {
       {
         source: '/bare/:path*',
         destination: 'https://uv.holyubofficial.net/:path*'
+      },
+      {
+        source: '/proxy/:path*',
+        destination: '/api/proxy/:path*'
       }
-    ]
+    ];
   }
-}
+};
 
-export default nextConfig
+export default nextConfig;

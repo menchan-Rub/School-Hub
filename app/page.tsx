@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import React, { useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { LoginForm } from "./components/auth/LoginForm"
 import { UserDashboard } from "@/components/dashboard/user-dashboard"
@@ -13,10 +13,11 @@ import { useNavigationStore } from "@/lib/stores/navigation-store"
 import { AdminNav } from "@/components/admin/nav"
 import { useQuery } from "@tanstack/react-query"
 import { AdminStats } from "@/lib/types"
+import BrowserPage from "@/app/browser/page"
 
 export default function HomePage() {
   const { data: session, status } = useSession()
-  const { activeView } = useNavigationStore()
+  const { activeView, setActiveView } = useNavigationStore()
 
   // 管理者統計データの取得
   const { data: adminStats } = useQuery<AdminStats>({
@@ -77,6 +78,7 @@ export default function HomePage() {
               totalMessages: 0,
               monthlyActiveUsers: []
             }}
+            onHomeClick={() => setActiveView('dashboard')}
           />
         )
       case 'admin-users':
@@ -102,7 +104,11 @@ export default function HomePage() {
       case 'notifications':
         return <div>通知機能は開発中です</div>
       case 'browser':
-        return <div>ブラウザ機能は開発中です</div>
+        return (
+          <div className="w-full h-full">
+            <BrowserPage />
+          </div>
+        )
       case 'bookmarks':
         return <div>ブックマーク機能は開発中です</div>
       case 'dashboard':

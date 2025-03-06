@@ -126,5 +126,8 @@ export interface AdminStats {
   activeUsers: number
   totalServers: number
   totalMessages: number
-  monthlyActiveUsers: Array<{ date: string; count: number }>
+  monthlyActiveUsers: Array<{
+    month: string
+    count: number
+  }>
 } 
