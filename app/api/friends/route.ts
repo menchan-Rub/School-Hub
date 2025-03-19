@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import { friendships } from "@/lib/db/schema"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth/options"
-import { eq, and, or } from "drizzle-orm"
+import { authOptions } from "@/lib/auth"
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {

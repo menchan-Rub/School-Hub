@@ -45,30 +45,29 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { role: true }
+          where: { email: credentials.email }
         });
 
-        if (!user || !user.role) {
-          console.log("User or role not found:", credentials.email);
+        if (!user) {
+          console.log("ユーザーが見つかりません:", credentials.email);
           return null;
         }
 
-        const isValid = await compare(credentials.password, user.password);
+        const isValid = await compare(credentials.password, user.passwordHash);
         if (!isValid) {
-          console.log("Invalid password for:", credentials.email);
+          console.log("パスワードが無効です:", credentials.email);
           return null;
         }
 
-        // 返却するユーザー情報にroleを含める
+        // 返却するユーザー情報
         const returnUser = {
           id: user.id,
           email: user.email,
-          name: user.name,
-          role: user.role.name // ここでロール名を設定
+          name: user.name || "",
+          role: user.role // ユーザーモデルに直接roleフィールドがある
         };
 
-        console.log('Authorized user:', returnUser);
+        console.log('認証されたユーザー:', returnUser);
         return returnUser;
       }
     })
@@ -89,23 +88,22 @@ export const authOptions: NextAuthOptions = {
         const customUser = user as CustomUser;
         token.id = customUser.id;
         token.role = customUser.role;
-        console.log('Setting initial role in token:', customUser.role);
+        console.log('トークンに初期ロールを設定:', customUser.role);
       }
 
       // tokenにroleがない場合はDBから取得
-      if (!token.role) {
+      if (!token.role && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { 
-            email: token.email as string  // nullを除外
-          },
-          include: { role: true }
+            email: token.email
+          }
         });
 
-        if (dbUser?.role) {
-          token.role = dbUser.role.name;
-          console.log('Retrieved role from DB:', dbUser.role.name);
+        if (dbUser) {
+          token.role = dbUser.role;
+          console.log('DBからロールを取得:', dbUser.role);
         } else {
-          console.warn('No role found for user:', token.email);
+          console.warn('ユーザーにロールが見つかりません:', token.email);
         }
       }
 
@@ -118,7 +116,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
-        console.log('Setting role in session:', token.role);
+        console.log('セッションにロールを設定:', token.role);
       }
 
       return session;

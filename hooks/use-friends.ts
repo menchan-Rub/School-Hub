@@ -41,8 +41,10 @@ export function useFriends() {
 
   const acceptFriendRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`/api/friends/accept/${requestId}`, {
-        method: 'POST'
+      const response = await fetch(`/api/friends/actions/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId })
       })
       if (!response.ok) throw new Error()
       toast.success('フレンド申請を承認しました')
@@ -54,8 +56,10 @@ export function useFriends() {
 
   const rejectFriendRequest = async (requestId: string) => {
     try {
-      const response = await fetch(`/api/friends/reject/${requestId}`, {
-        method: 'POST'
+      const response = await fetch(`/api/friends/actions/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId })
       })
       if (!response.ok) throw new Error()
       toast.success('フレンド申請を拒否しました')

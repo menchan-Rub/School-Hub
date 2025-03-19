@@ -54,6 +54,16 @@ model User {
   createdRooms    ChatRoom[] @relation("CreatedRooms")
   participantIn   ChatRoom[] @relation("RoomParticipants")
   matrixToken     String?    @db.Text // Matrixのアクセストークンを保存
+  matrixUserId    String?    @db.Text // Matrixのユーザーを保存
+  
+  // 二段階認証関連フィールド
+  twoFactorEnabled      Boolean @default(false)
+  twoFactorSecret       String? @db.Text
+  twoFactorBackupCodes  String? @db.Text
+  
+  // フレンド関係
+  sentFriendRequests     Friend[] @relation("SenderFriends")
+  receivedFriendRequests Friend[] @relation("ReceiverFriends")
 }
 
 model VerificationToken {
@@ -151,6 +161,7 @@ model SystemSettings {
   defaultLocale String   @default("ja-JP")
   timezone      String   @default("Asia/Tokyo")
   updatedAt     DateTime @updatedAt
+  matrixAdmin   String?  @db.Text // Matrix管理者情報をJSON形式で保存
 }
 
 model SecuritySettings {
@@ -174,4 +185,18 @@ model ChatRoom {
   createdBy   User     @relation("CreatedRooms", fields: [createdById], references: [id])
   createdById String
   participants User[]  @relation("RoomParticipants")
+}
+
+model Friend {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   // "PENDING" or "ACCEPTED"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  sender     User     @relation("SenderFriends", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceiverFriends", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
 }

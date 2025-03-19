@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type View = 
+export type NavigationView = 
   | 'dashboard'
   | 'admin-overview'
   | 'admin-users'
@@ -16,10 +16,11 @@ type View =
   | 'notifications'
   | 'browser'
   | 'bookmarks'
+  | 'settings'
 
 interface NavigationStore {
-  activeView: View
-  setActiveView: (view: View) => void
+  activeView: NavigationView
+  setActiveView: (view: NavigationView) => void
 }
 
 export const useNavigationStore = create<NavigationStore>((set) => ({

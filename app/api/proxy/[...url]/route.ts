@@ -21,7 +21,7 @@ export async function GET(
 ) {
   try {
     const targetUrl = params.url.join('/');
-    console.log('Proxying request to:', targetUrl);
+    console.log('プロキシリクエスト:', targetUrl);
 
     // URLの検証と修正
     let fullUrl = targetUrl;
@@ -29,64 +29,73 @@ export async function GET(
       fullUrl = `https://${fullUrl}`;
     }
 
-    console.log('Full URL:', fullUrl);
+    console.log('完全なURL:', fullUrl);
 
     // リクエストヘッダーの準備
     const headers = new Headers();
-    ALLOWED_HEADERS.forEach(header => {
-      const value = request.headers.get(header);
-      if (value) {
-        headers.set(header, value);
+    // Array.fromでイテレーションの代わりに配列に変換してから処理
+    Array.from(request.headers.entries()).forEach(([key, value]) => {
+      if (ALLOWED_HEADERS.includes(key.toLowerCase())) {
+        headers.set(key, value);
       }
     });
 
-    // User-Agentの設定
+    // 必須ヘッダーの設定
     headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+    headers.set('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8');
+    headers.set('Accept-Language', 'ja,en-US;q=0.7,en;q=0.3');
+    headers.set('Upgrade-Insecure-Requests', '1');
+    headers.set('Sec-Fetch-Dest', 'document');
+    headers.set('Sec-Fetch-Mode', 'navigate');
+    headers.set('Sec-Fetch-Site', 'none');
+    headers.set('Sec-Fetch-User', '?1');
 
-    // プロキシリクエストの設定
-    const proxyRequest = new Request(fullUrl, {
+    // プロキシリクエストの実行
+    console.log('プロキシリクエストを送信中...');
+    const response = await fetch(fullUrl, {
       method: request.method,
       headers: headers,
       redirect: 'follow',
       cache: 'no-store',
     });
 
-    // リクエストの実行
-    console.log('Sending proxy request...');
-    const response = await fetch(proxyRequest);
-    console.log('Proxy response status:', response.status);
+    console.log('プロキシレスポンスステータス:', response.status);
+    console.log('レスポンスタイプ:', response.headers.get('Content-Type'));
 
     // レスポンスの処理
     const data = await response.blob();
-    console.log('Response content type:', response.headers.get('Content-Type'));
 
     // レスポンスヘッダーの設定
     const responseHeaders = new Headers();
-    
-    // オリジナルのヘッダーをコピー
-    for (const [key, value] of response.headers.entries()) {
-      if (!['content-encoding', 'content-length'].includes(key.toLowerCase())) {
+
+    // Array.fromでイテレーションの代わりに配列に変換してから処理
+    Array.from(response.headers.entries()).forEach(([key, value]) => {
+      if (!['content-encoding', 'content-length', 'content-security-policy', 'x-frame-options'].includes(key.toLowerCase())) {
         responseHeaders.set(key, value);
       }
-    }
+    });
 
-    // セキュリティヘッダーの設定
+    // CORSとセキュリティヘッダーの設定
     responseHeaders.set('Access-Control-Allow-Origin', '*');
-    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD, OPTIONS');
     responseHeaders.set('Access-Control-Allow-Headers', ALLOWED_HEADERS.join(', '));
-    responseHeaders.set('X-Frame-Options', 'SAMEORIGIN');
-    responseHeaders.delete('X-Frame-Options');  // iframeでの表示を許可
-    responseHeaders.set('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self' *");
+    responseHeaders.set('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors 'self' *");
+
+    // キャッシュ制御
+    responseHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    responseHeaders.set('Pragma', 'no-cache');
+    responseHeaders.set('Expires', '0');
 
     return new NextResponse(data, {
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
     });
+
   } catch (error) {
-    console.error('Proxy error:', error);
+    console.error('プロキシエラー:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch content', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'コンテンツの取得に失敗しました', details: error instanceof Error ? error.message : '不明なエラー' },
       { status: 500 }
     );
   }
@@ -99,13 +108,34 @@ export async function POST(
   return GET(request, { params });
 }
 
+export async function HEAD(
+  request: NextRequest,
+  { params }: { params: { url: string[] } }
+) {
+  return GET(request, { params });
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { url: string[] } }
+) {
+  return GET(request, { params });
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { url: string[] } }
+) {
+  return GET(request, { params });
+}
+
 export async function OPTIONS(
   request: NextRequest
 ) {
   return new NextResponse(null, {
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, HEAD, OPTIONS',
       'Access-Control-Allow-Headers': ALLOWED_HEADERS.join(', '),
     },
   });

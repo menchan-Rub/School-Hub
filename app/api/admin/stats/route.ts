@@ -46,10 +46,17 @@ export async function GET() {
     // 日付でソートして整形
     const formattedMonthlyData = monthlyActiveUsers
       .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
-      .map(day => ({
-        date: day.startTime.toISOString().split('T')[0],
-        count: day._count.userId
-      }))
+      .map(day => {
+        // 月の名前を取得
+        const date = new Date(day.startTime);
+        const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+        const month = monthNames[date.getMonth()];
+        
+        return {
+          month: month,
+          count: day._count.userId
+        };
+      });
 
     return NextResponse.json({
       totalUsers,
